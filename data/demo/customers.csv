@@ -1,0 +1,221 @@
+customer_id,full_name,email,country,segment,age,signup_date,revenue,is_active
+CUST-00001,David Esposito,david.esposito@example.com,SE,SMB,58,2023-03-07,"82,825.46",true
+CUST-00002,  Nils Costa ,nils.costa@example.com,PT,Public Sector,75,2022-07-26,"7,368.93",false
+CUST-00003,Jonas Costa,jonas.costa@example.com,Italy,SMB,29,2022-02-21,"81,089.98",false
+CUST-00004,Sven Rossi,,NL,SMB,23,2024-06-18,"37,502.25",true
+CUST-00005,Olivia Dupont,olivia.dupont@example.com,SE,SMB,40,22/08/2023,"18,846.55",false
+CUST-00006,Elena Kowalski,alice.martin@,NL,Public Sector,24,2023-10-15,"37,652.76",false
+CUST-00007,Elena Weber,elena.weber@example.com,BE,SMB,48,2022-04-19,"69,557.54",true
+CUST-00008,Greta Kowalski,greta.kowalski@example.com,PT,unknown,64,2023-01-23,"48,469.82",false
+CUST-00009,Chloé Lambert,chloe.lambert@example.com,ES,Mid-Market,71,2024-04-11,"-25,309.73",false
+CUST-00010,NILS NILSSON,nils.nilsson@example.com,PT,Mid-Market,30,2024-04-20,"6,356.11",false
+CUST-00011,Nils Moreau,nils.moreau@example.com,NL,Mid-Market,32,2024-01-21,"35,160.62",false
+CUST-00012,François Kowalski,francois.kowalski@example.com,   ,Public Sector,60,2023-01-31,"29,426.72",true
+CUST-00013,Luca Bakker,luca.bakker@example.com,ES,Enterprise,0,2023-07-26,"36,158.37",false
+CUST-00014,Olivia Weber,olivia.weber@example.com,DE,Enterprise,68,2023-04-22,"3,468.27",false
+CUST-00015,Elena Dupont,elena.dupont@example.com,DEU,Public Sector,73,2022-04-04,"50,323.09",true
+CUST-00016,Greta Esposito,greta.esposito@example.com,NL,SMB,55,2023-01-08,"12,532.06",true
+CUST-00017,Ulrich Bakker,ulrich.bakker@example.com,SE,Enterprise,56,2023-02-30,"42,644.83",false
+CUST-00018,Rosa Martin,,NL,Mid-Market,51,2022-11-19,"79,940.74",true
+CUST-00019,David Kowalski,david.kowalski@example.com,IT,Public Sector,63,2023-12-16,"89,104.44",false
+CUST-00020,Rosa Costa,rosa.costa@example.com,DE,SMB,67,2023-09-05,"86,567.34",false
+CUST-00021,Bruno Silva,bruno.silva@example.com,IT,SMB,72,2023-03-30,"€ 86,756.47",true
+CUST-00022,Wouter Kowalski,wouter.kowalski@example.com,IT,Enterprise,32,2022-04-08,"35,384.45",false
+CUST-00023,Sven Weber,sven.weber@example.com,NL,Public Sector,31,2022-08-15,"29,496.62",true
+CUST-00024,François Kowalski,bruno.dupont.example.com,PT,Mid-Market,78,2023-08-02,"35,673.05",false
+CUST-00025,Teresa Weber,teresa.weber@example.com,DE,SMB,70,2023-02-05,"32,674.99",false
+CUST-00026,Luca Lambert,luca.lambert@example.com,ES,Public Sector,49,2022-11-10,"58,096.58",false
+CUST-00027,  Ulrich Costa ,ulrich.costa@example.com,NL,Enterprise,30,2023-08-28,"28,117.81",true
+CUST-00028,François Kowalski,francois.kowalski@example.com,DE,SMB,63,2023-07-09,"18,150.43",false
+CUST-00029,Hugo Martin,hugo.martin@example.com,SE,Public Sector,35,2024-05-19,"68,860.24",true
+CUST-00030,Marta Martin,marta.martin@example.com,FR,Public Sector,37,01/02/2024,"84,946.66",false
+CUST-00031,Greta Weber,greta.weber@example.com,SE,SMB,53,2022-03-30,"84,071.94",true
+CUST-00032,Bruno Weber,bruno.weber@example.com,SE,SMB,56,2027-10-04,"69,441.57",true
+CUST-00033,François Martin,francois.martin@example.com,ES,Enterprise,42,2022-05-13,"43,768.93",false
+CUST-00034,Yara Martin,yara.martin@example.com,SE,Mid-Market,71,2022-04-27,"43,584.29",false
+CUST-00035,Pablo Fischer,pablo.fischer@example.com,FR,Enterprise,52,2022-11-17,"57,479.65",true
+CUST-00036,Ulrich Weber,ulrich.weber@example.com,PT,Mid-Market,32,2022-01-20,approx 500,false
+CUST-00037,Katarina Kowalski,katarina.kowalski@example.com,SE,SMB,40,2024-05-19,"30,879.62",false
+CUST-00038,Ingrid Weber,ingrid.weber@example.com,BE,Mid-Market,22,2023-09-13,"38,378.30",true
+CUST-00039,KATARINA BAKKER,katarina.bakker@example.com,BE,Public Sector,71,2024-06-13,"34,946.34",false
+CUST-00040,Ulrich Novak,ulrich.novak@example.com,ES,SMB,68,2022-10-05,"48,046.31",false
+CUST-00041,Chloé Andersen,chloe.andersen@example.com,ES,SMB,40,2023-11-30,"17,007.79",false
+CUST-00042,Valentina Jensen,valentina.jensen@example.com,ES,SMB,28,2023-02-07,"47,984.03",true
+CUST-00043,Alice Bakker,,DE,SMB,52,2022-05-03,"28,927.34",true
+CUST-00044,Bruno Bakker,bruno.bakker@example.com,DE,Mid-Market,76,2022-09-17,"72,913.40",false
+CUST-00045,Sven Novak,sven.novak@example.com,PT,SMB,199,2024-05-27,"31,774.78",true
+CUST-00046,Wouter Weber,wouter.weber@example.com,IT,Public Sector,71,2024-02-24,"10,037.99",true
+CUST-00047,Marta Silva,marta.silva@example.com,BE,Mid-Market,36,2022-08-06,"21,744.95",true
+CUST-00048,Teresa Nilsson,teresa.nilsson@example.com,it,Enterprise,73,2023-07-01,"11,756.48",true
+CUST-00049,Elena Fischer,elena.fischer@example.com,NL,Public Sector,38,2022-11-24,"51,693.83",false
+CUST-00050,Nils Kowalski,nils.kowalski@example.com,NL,Enterprise,49,2023-09-11,"21,525.90",true
+CUST-00051,Jonas Dupont,jonas.dupont@example.com,DE,SMB,69,2022-10-01,"44,926.39",false
+CUST-00052,Teresa Andersen,teresa.andersen@example.com,IT,SMB,45,2022-06-24,"-89,001.78",false
+CUST-00053,Chloé Bakker,chloe.bakker@example.com,NL,Public Sector,61,2023-02-12,"80,147.88",true
+CUST-00054,Ingrid Costa,ingrid.costa@example.com,SE,Enterprise,67,2023-05-05,"76,396.44",true
+CUST-00055,Alice Fischer,alice.fischer@example.com,ES,SMB,76,2022-11-21,"29,104.32",true
+CUST-00056,  David Costa ,david.costa@example.com,PT,SMB,25,2022-08-23,"8,792.80",false
+CUST-00057,Chloé Weber,chloe.weber@example.com,FR,SMB,61,2022-12-17,"20,881.56",false
+CUST-00058,Olivia Martin,olivia.martin@example.com,DE,Public Sector,40,2023-08-27,"17,883.89",true
+CUST-00059,Ingrid Fischer,ingrid.fischer@example.com,PT,SMB,70,2022-06-15,"43,291.42",true
+CUST-00060,Marta Novak,marta.novak@example.com,   ,Mid-Market,44,2022-08-04,"47,426.66",false
+CUST-00061,Teresa Novak,teresa.novak@example.com,PT,Enterprise,51,2023-01-10,"55,327.43",true
+CUST-00062,Luca Rossi,chloe@@example.com,DE,Mid-Market,43,2022-08-07,"32,041.33",true
+CUST-00063,Yara Weber,yara.weber@example.com,IT,Public Sector,49,2023-11-08,"36,447.08",true
+CUST-00064,Yara Costa,yara.costa@example.com,FR,Mid-Market,38,2023-06-20,"88,838.51",false
+CUST-00065,Nils Esposito,nils.esposito@example.com,BE,unknown,47,2022-12-31,"42,578.02",true
+CUST-00066,Alice Silva,alice.silva@example.com,SE,Enterprise,64,2023-05-08,"86,535.07",false
+CUST-00067,Jonas Kowalski,jonas.kowalski@example.com,IT,SMB,22,07/01/2023,"52,866.39",false
+CUST-00068,Elena Costa,elena.costa@example.com,FR,Public Sector,46,2022-09-05,"54,875.39",true
+CUST-00069,Rosa Kowalski,rosa.kowalski@example.com,SE,Enterprise,43,2022-02-13,"13,644.01",true
+CUST-00070,Wouter Jensen,wouter.jensen@example.com,FR,Public Sector,43,2022-11-08,"68,280.55",true
+CUST-00071,Chloé Andersen,chloe.andersen@example.com,Germany,Enterprise,50,2023-02-21,"58,633.68",false
+CUST-00072,Wouter Jensen,wouter.jensen@example.com,IT,Enterprise,74,2022-09-10,"71,902.10",false
+CUST-00073,Quentin Costa,quentin.costa@example.com,IT,Public Sector,73,2024-05-30,"39,349.63",true
+CUST-00074,Jonas Silva,jonas.silva@example.com,FR,Enterprise,54,2023-04-05,"€ 69,950.02",true
+CUST-00075,François Costa,francois.costa@example.com,FR,Enterprise,76,2022-06-07,"52,481.55",false
+CUST-00076,Ulrich Rossi,ulrich.rossi@example.com,PT,Public Sector,46,2024-01-23,"45,241.17",true
+CUST-00077,Chloé Silva,chloe.silva@example.com,FR,Enterprise,45,2022-05-04,"48,333.52",false
+CUST-00078,MARTA WEBER,marta.weber@example.com,NL,Public Sector,32,2022-03-17,"67,730.25",true
+CUST-00079,Sven Jensen,sven.jensen@example.com,IT,SMB,23,2022-07-18,"6,331.85",true
+CUST-00080,Valentina Nilsson,valentina.nilsson@example.com,IT,Public Sector,41,2022-07-19,"60,528.19",true
+CUST-00081,Katarina Esposito,katarina.esposito@example.com,NL,Mid-Market,77,2022-03-04,"32,170.39",false
+CUST-00082,Luca Novak,luca.novak@example.com,FR,Public Sector,53,2022-01-03,"32,008.46",true
+CUST-00083,Yara Jensen,yara.jensen@example.com,FR,Public Sector,71,2022-11-19,"59,967.43",true
+CUST-00084,Jonas Novak,jonas.novak@example.com,PT,Mid-Market,-5,2023-07-24,"51,411.52",false
+CUST-00085,Valentina Fischer,valentina.fischer@example.com,IT,Public Sector,60,2024-05-16,"67,933.03",true
+CUST-00086,Luca Costa,luca.costa@example.com,DE,Public Sector,45,2023-02-18,"36,302.38",false
+CUST-00087,Nils Andersen,nils.andersen@example.com,PT,Public Sector,77,2023-12-07,"64,381.50",false
+CUST-00088,Quentin Fischer,quentin.fischer@example.com,DE,SMB,32,2024-13-01,"33,828.38",false
+CUST-00089,Teresa Dupont,,IT,SMB,28,2023-12-16,"58,798.38",true
+CUST-00090,Teresa Rossi,teresa.rossi@example.com,BE,Enterprise,21,2023-10-01,"80,008.28",true
+CUST-00091,Marta Novak,marta.novak@example.com,PT,Public Sector,43,2024-04-10,"73,464.19",true
+CUST-00092,Luca Costa,luca.costa@example.com,BE,Mid-Market,24,2023-12-07,"37,303.28",false
+CUST-00093,Ulrich Fischer,ulrich.fischer@example.com,FR,SMB,78,2022-11-10,"14,408.12",true
+CUST-00094,Elena Costa,elena.costa@example.com,IT,Public Sector,23,2022-08-23,"30,976.00",false
+CUST-00095,Chloé Silva,chloe.silva@example.com,BE,Mid-Market,38,2024-02-19,"35,412.71",false
+CUST-00096,Elena Jensen,david.weber@example,SE,Mid-Market,62,2022-01-09,"15,923.80",true
+CUST-00097,François Bakker,francois.bakker@example.com,SE,SMB,30,2022-11-12,"-83,987.38",true
+CUST-00098,Ingrid Andersen,ingrid.andersen@example.com,NL,Public Sector,28,2022-04-01,"63,728.62",true
+CUST-00099,Alice Lambert,alice.lambert@example.com,FR,Public Sector,63,2023-01-01,"11,657.32",true
+CUST-00100,Nils Bakker,nils.bakker@example.com,SE,SMB,22,2022-10-14,"68,568.74",false
+CUST-00101,Bruno Rossi,bruno.rossi@example.com,PT,Enterprise,25,2023-11-24,"13,902.78",true
+CUST-00102,François Moreau,francois.moreau@example.com,ES,SMB,69,2024-02-24,"3,845.56",true
+CUST-00103,  Hugo Silva ,hugo.silva@example.com,FR,SMB,60,2023-10-09,"36,107.20",false
+CUST-00104,Jonas Weber,jonas.weber@example.com,NL,Public Sector,67,2022-10-30,"45,453.84",false
+CUST-00105,Alice Kowalski,alice.kowalski@example.com,IT,Public Sector,55,2027-10-04,"16,235.09",false
+CUST-00106,Rosa Jensen,rosa.jensen@example.com,NL,Enterprise,58,2024-03-05,"27,899.10",false
+CUST-00107,Ingrid Nilsson,ingrid.nilsson@example.com,DE,SMB,43,2024-02-22,"89,894.81",true
+CUST-00108,David Andersen,david.andersen@example.com,NL,Public Sector,73,2024-06-04,"85,914.65",true
+CUST-00109,François Bakker,francois.bakker@example.com,SE,Mid-Market,69,2024-01-01,"12,533.40",true
+CUST-00110,David Silva,david.silva@example.com,DE,Enterprise,24,2023-10-29,"43,922.60",false
+CUST-00111,Quentin Martin,quentin.martin@example.com,DE,SMB,29,2022-09-01,"€ 53,229.77",false
+CUST-00112,François Dupont,francois.dupont@example.com,PT,SMB,75,2023-04-24,"76,470.65",true
+CUST-00113,Ulrich Andersen,ulrich.andersen@example.com,NL,Public Sector,60,2023-09-24,"68,024.33",false
+CUST-00114,Jonas Esposito,jonas.esposito@example.com,FR,SMB,38,14/06/2024,"30,881.90",true
+CUST-00115,Pablo Esposito,pablo.esposito@example.com,ES,Mid-Market,30,2023-10-06,"3,185.63",true
+CUST-00116,Hugo Nilsson,hugo.nilsson@example.com,FR,SMB,62,2022-09-11,"12,045.17",true
+CUST-00117,Hugo Martin,hugo.martin@example.com,IT,SMB,53,2022-10-06,"48,152.16",false
+CUST-00118,Jonas Kowalski,jonas.kowalski@example.com,FR,SMB,68,2023-03-30,"39,324.71",false
+CUST-00119,Chloé Fischer,chloe.fischer@example.com,PT,Enterprise,61,2023-07-27,"38,197.44",true
+CUST-00120,OLIVIA NOVAK,olivia.novak@example.com,ES,Public Sector,23,2022-05-26,"82,505.17",false
+CUST-00121,Teresa Silva,teresa.silva@example.com,DE,Mid-Market,71,2023-09-22,"20,544.56",true
+CUST-00122,Greta Rossi,greta.rossi@example.com,   ,SMB,69,2022-05-12,"36,685.52",false
+CUST-00123,Sven Martin,sven.martin@example.com,FR,Mid-Market,28,2022-05-07,"28,859.98",true
+CUST-00124,Chloé Jensen,chloe.jensen@example.com,PT,Mid-Market,45,2022-07-27,"24,985.67",false
+CUST-00125,David Andersen,david.andersen@example.com,SE,Public Sector,29,2022-12-15,"20,787.39",false
+CUST-00126,Jonas Novak,jonas.novak@example.com,FR,Public Sector,58,2024-02-25,"7,063.61",false
+CUST-00127,Bruno Esposito,bruno.esposito@example.com,SE,SMB,52,2023-01-10,"62,404.91",false
+CUST-00128,Jonas Fischer,jonas.fischer@example.com,SE,Enterprise,45,2022-04-09,"8,762.95",true
+CUST-00129,Quentin Dupont,quentin.dupont@example.com,FR,SMB,21,2022-04-19,twelve,true
+CUST-00130,Sven Bakker,sven.bakker@example.com,ES,Public Sector,48,2023-02-13,"25,306.19",true
+CUST-00131,Jonas Nilsson,,BE,Enterprise,51,2023-07-04,"47,534.92",true
+CUST-00132,François Weber,francois.weber@example.com,NL,Enterprise,27,2023-03-18,"20,911.01",false
+CUST-00133,Bruno Weber,bruno.weber@example.com,ES,Public Sector,21,2022-09-14,"57,109.13",true
+CUST-00134,Jonas Nilsson,jonas.nilsson@example.com,NL,SMB,55,2023-08-27,"74,566.18",true
+CUST-00135,Sven Weber,sven.weber@example.com,FR,Mid-Market,77,2023-09-15,"-46,300.61",false
+CUST-00136,Yara Jensen,yara.jensen@example.com,NL,Enterprise,44,2023-11-19,"66,054.44",false
+CUST-00137,Marta Jensen,marta.jensen@example.com,NL,Public Sector,28,2024-03-02,"10,159.63",true
+CUST-00138,Nils Silva,nils.silva@example.com,PT,SMB,32,2022-07-26,"76,170.48",false
+CUST-00139,Luca Silva,luca.silva@example.com,FR,Public Sector,67,2024-06-01,"31,819.50",false
+CUST-00140,Chloé Bakker,chloe.bakker@example.com,NL,Public Sector,22,2022-01-30,"51,329.56",true
+CUST-00141,Luca Silva,elena rossi@example.com,NL,Enterprise,73,2023-03-13,"46,639.89",false
+CUST-00142,Luca Andersen,luca.andersen@example.com,BE,Enterprise,22,2024-03-21,"5,544.58",false
+CUST-00143,Wouter Martin,wouter.martin@example.com,ES,Enterprise,56,2022-03-18,"55,917.12",false
+CUST-00144,Pablo Lambert,pablo.lambert@example.com,PT,SMB,57,2023-02-21,"1,343.43",true
+CUST-00145,Ingrid Fischer,ingrid.fischer@example.com,PT,Enterprise,74,2023-01-23,"13,625.61",true
+CUST-00146,Luca Silva,luca.silva@example.com,BE,SMB,44,not a date,"26,111.59",true
+CUST-00147,Alice Esposito,alice.esposito@example.com,ES,Mid-Market,27,2023-02-05,"47,323.88",true
+CUST-00148,Jonas Fischer,jonas.fischer@example.com,SE,Enterprise,63,2024-03-17,"65,422.66",false
+CUST-00149,  Pablo Dupont ,pablo.dupont@example.com,SE,Public Sector,23,2023-06-12,"17,846.13",false
+CUST-00150,Teresa Martin,teresa.martin@example.com,IT,Enterprise,67,2022-07-11,"83,696.64",true
+CUST-00151,Ulrich Moreau,ulrich.moreau@example.com,SE,Public Sector,71,2023-07-07,"7,888.41",false
+CUST-00152,Hugo Nilsson,hugo.nilsson@example.com,NL,Enterprise,30,2022-05-22,"1,289.73",false
+CUST-00153,Ingrid Dupont,ingrid.dupont@example.com,NL,Enterprise,74,2022-11-29,"41,062.70",false
+CUST-00154,David Rossi,david.rossi@example.com,NL,SMB,60,2024-05-29,"31,165.99",false
+CUST-00155,Valentina Esposito,valentina.esposito@example.com,FR,Enterprise,41,2022-03-07,"43,146.92",true
+CUST-00156,Hugo Andersen,hugo.andersen@example.com,ITA,Mid-Market,72,2023-02-01,"13,229.30",false
+CUST-00157,Ulrich Novak,ulrich.novak@example.com,IT,Mid-Market,64,2024-06-08,"27,426.38",true
+CUST-00158,Olivia Novak,olivia.novak@example.com,NL,Mid-Market,65,2022-06-13,"34,759.37",true
+CUST-00159,Bruno Costa,bruno.costa@example.com,IT,Public Sector,69,14/03/2022,"6,310.12",false
+CUST-00160,Luca Dupont,luca.dupont@example.com,ES,Public Sector,73,2022-09-16,"50,194.44",true
+CUST-00161,Sven Martin,sven.martin@example.com,DE,Public Sector,72,2023-08-03,"86,624.48",true
+CUST-00162,Nils Andersen,nils.andersen@example.com,IT,Mid-Market,67,2023-02-05,"34,719.53",true
+CUST-00163,Luca Bakker,luca.bakker@example.com,FR,Public Sector,22,2024-01-21,"3,948.28",false
+CUST-00164,ELENA MARTIN,elena.martin@example.com,ES,Public Sector,25,2022-05-13,"55,248.56",true
+CUST-00165,Olivia Jensen,olivia.jensen@example.com,SE,SMB,71,2022-08-11,"45,241.71",true
+CUST-00166,Luca Jensen,luca.jensen@example.com,IT,SMB,35,2023-11-23,"26,017.82",true
+CUST-00167,François Moreau,francois.moreau@example.com,DE,SMB,54,2023-10-19,"87,832.59",false
+CUST-00168,Ulrich Nilsson,ulrich.nilsson@example.com,FR,Mid-Market,150,2022-12-25,"3,534.62",true
+CUST-00169,Jonas Nilsson,jonas.nilsson@example.com,IT,Enterprise,36,2022-06-14,"83,262.16",true
+CUST-00170,Hugo Nilsson,hugo.nilsson@example.com,ES,Public Sector,47,2022-01-24,"72,326.25",false
+CUST-00171,Pablo Rossi,pablo.rossi@example.com,DE,Public Sector,72,2023-09-14,"75,518.59",false
+CUST-00172,Chloé Rossi,chloe.rossi@example.com,FR,Mid-Market,39,2022-10-06,"8,076.00",true
+CUST-00173,Katarina Lambert,katarina.lambert@example.com,ES,SMB,36,2023-10-14,"46,533.33",false
+CUST-00174,Rosa Bakker,rosa.bakker@example.com,BE,Public Sector,57,2022-05-21,"44,713.95",false
+CUST-00175,Jonas Jensen,jonas.jensen@example.com,DE,Mid-Market,46,2022-03-10,"10,826.37",false
+CUST-00176,Teresa Silva,teresa.silva@example.com,NL,Mid-Market,58,2024-02-25,"60,462.31",false
+CUST-00177,Greta Nilsson,greta.nilsson@example.com,NL,Enterprise,71,2022-07-01,"80,331.41",false
+CUST-00178,Sven Kowalski,sven.kowalski@example.com,DE,SMB,78,2024-02-29,"72,923.12",true
+CUST-00179,Sven Nilsson,sven.nilsson@example.com,BE,Mid-Market,25,2024-01-22,"36,081.17",true
+CUST-00180,Chloé Costa,chloe.costa@example.com,BE,Public Sector,70,2022-07-24,"32,028.15",true
+CUST-00181,Ulrich Esposito,ulrich.esposito@example.com,DE,Mid-Market,78,2022-11-19,"63,265.32",false
+CUST-00182,David Dupont,david.dupont@example.com,PT,Mid-Market,55,2024-03-03,"76,624.27",false
+CUST-00183,Jonas Fischer,jonas.fischer@example.com,IT,Enterprise,53,2022-12-16,"34,009.91",false
+CUST-00184,Quentin Jensen,quentin.jensen@example.com,PT,Public Sector,66,2022-08-05,"40,722.24",false
+CUST-00185,Ulrich Lambert,ulrich.lambert@example.com,BE,SMB,61,2022-05-23,"80,149.31",false
+CUST-00186,Pablo Kowalski,pablo.kowalski@example.com,IT,Mid-Market,42,2024-04-08,"30,071.86",true
+CUST-00187,Jonas Fischer,jonas.fischer@example.com,FR,SMB,72,2022-07-18,"2,550.59",false
+CUST-00188,Yara Rossi,yara.rossi@example.com,FR,Enterprise,23,2022-12-19,"40,098.60",true
+CUST-00189,Jonas Bakker,jonas.bakker@example.com,PT,Enterprise,45,2022-12-16,"21,039.37",true
+CUST-00190,Marta Weber,marta.weber@example.com,FR,SMB,71,2022-03-30,"8,279.99",false
+CUST-00191,Luca Silva,luca.silva@example.com,BE,Enterprise,71,2023-06-19,"15,608.10",true
+CUST-00192,Ingrid Bakker,ingrid.bakker@example.com,ES,Enterprise,45,2022-12-09,"30,463.15",true
+CUST-00193,Olivia Novak,olivia.novak@example.com,FR,Enterprise,58,2022-04-10,"51,456.25",false
+CUST-00194,Sven Weber,sven.weber@example.com,DE,Public Sector,74,2022-02-23,"38,531.07",false
+CUST-00195,Sven Rossi,sven.rossi@example.com,ES,SMB,29,2022-06-28,"28,086.83",true
+CUST-00196,Pablo Jensen,pablo.jensen@example.com,FR,Public Sector,52,2023-03-06,"35,155.73",true
+CUST-00197,David Bakker,david.bakker@example.com,NL,Public Sector,38,2023-02-08,"84,453.69",false
+CUST-00198,Rosa Novak,rosa.novak@example.com,ES,Enterprise,49,2023-06-22,"17,850.36",true
+CUST-00199,Nils Bakker,nils.bakker@example.com,ES,Public Sector,24,2024-03-01,"84,625.76",false
+CUST-00200,Nils Fischer,nils.fischer@example.com,PT,Enterprise,36,2023-05-26,"28,272.95",true
+CUST-00011,Nils Moreau,nils.moreau@example.com,NL,Mid-Market,32,2024-01-21,"35,160.62",false
+CUST-00026,Luca Lambert,luca.lambert@example.com,ES,Public Sector,49,2022-11-10,"58,096.58",false
+CUST-00041,chloé andersen,chloe.andersen@example.com,ES,Enterprise,41,2023-11-30,"17,007.79",false
+CUST-00058,olivia martin,olivia.martin@example.com,DE,SMB,41,2023-08-27,"17,883.89",true
+CUST-00205,Hugo Martin,hugo.martin@example.com,IT,SMB,61,2022-08-02,"67,787.41",false
+CUST-00206,Pablo Andersen,pablo.andersen@example.com,DE,Public Sector,65,2024-04-03,"40,052.70",false
+CUST-00207,Bruno Jensen,bruno.jensen@example.com,BE,Enterprise,49,2022-09-21,"25,366.39",false
+CUST-00208,Ulrich Fischer,ulrich.fischer@example.com,FR,SMB,72,2023-03-28,"38,757.66",false
+CUST-00209,Elena Martin,elena.martin@example.com,PT,Public Sector,41,2023-11-10,"30,941.66",false
+CUST-00210,Elena Bakker,elena.bakker@example.com,ES,SMB,71,2022-03-12,"66,166.60",false
+CUST-00211,Quentin Moreau,quentin.moreau@example.com,FR,Mid-Market,69,2023-08-16,"70,274.35",true
+CUST-00212,Marta Kowalski,marta.kowalski@example.com,ES,SMB,78,2022-12-28,"65,834.86",false
+CUST-00213,Hugo Kowalski,hugo.kowalski@example.com,NL,SMB,22,2022-06-07,"22,792.44",true
+CUST-00214,Yara Bakker,yara.bakker@example.com,IT,Public Sector,52,2023-12-12,"28,153.00",true
+CUST-00215,Jonas Rossi,jonas.rossi@example.com,SE,SMB,68,2022-07-15,"46,802.22",true
+CUST-00216,Ulrich Bakker,ulrich.bakker@example.com,SE,Public Sector,61,2022-05-30,"69,461.16",false
+CUST-00217,Yara Andersen,yara.andersen@example.com,IT,SMB,64,2022-02-20,"85,130.32",false
+CUST-00218,Quentin Martin,quentin.martin@example.com,FR,Public Sector,53,2023-05-01,"56,388.60",false
+CUST-00219,Rosa Rossi,rosa.rossi@example.com,PT,Mid-Market,68,2022-11-22,"68,313.75",false
+CUST-00220,Chloé Fischer,chloe.fischer@example.com,IT,SMB,76,2022-01-17,"5,114.82",true

@@ -1,0 +1,66 @@
+# Data Quality Copilot - local stack.
+#
+#   docker compose up --build
+#
+# Two containers, on purpose: the Streamlit app and PostgreSQL. No queue, no cache, no
+# reverse proxy - none of them would carry their weight for a single-user demo, and each
+# one would be another thing to explain and to keep working.
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: dqcopilot-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-dqcopilot}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dqcopilot}
+      POSTGRES_DB: ${POSTGRES_DB:-dqcopilot}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      # The app container waits for this before running migrations.
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-dqcopilot} -d ${POSTGRES_DB:-dqcopilot}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    # Not published to the host by default: nothing outside the compose network needs
+    # it. Uncomment to inspect the audit tables with a local client.
+    # ports:
+    #   - "5432:5432"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dqcopilot-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_ENV: docker
+      DATABASE_URL: >-
+        postgresql+psycopg://${POSTGRES_USER:-dqcopilot}:${POSTGRES_PASSWORD:-dqcopilot}@db:5432/${POSTGRES_DB:-dqcopilot}
+      # Read from the host environment or a local .env file; never baked into the image.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-opus-5}
+      # Relative to the container WORKDIR (/app). Making it explicit here means a
+      # missing rule file is a configuration error, not a silent no-op.
+      RULES_FILE: ${RULES_FILE:-config/business_rules.yaml}
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-25}
+      MAX_ROWS: ${MAX_ROWS:-200000}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_JSON: ${LOG_JSON:-true}
+      PERSIST_EXAMPLES: ${PERSIST_EXAMPLES:-false}
+      AI_SEND_SAMPLES: ${AI_SEND_SAMPLES:-true}
+      STREAMLIT_SERVER_MAX_UPLOAD_SIZE: ${MAX_UPLOAD_MB:-25}
+    ports:
+      - "${APP_PORT:-8501}:8501"
+    volumes:
+      # Generated demo datasets survive a container rebuild.
+      - demo_data:/app/data/demo
+
+volumes:
+  postgres_data:
+  demo_data:

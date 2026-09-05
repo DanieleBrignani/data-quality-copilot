@@ -1,0 +1,109 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dqcopilot"
+version = "0.1.0"
+description = "Data Quality Copilot - upload, profile, validate and clean tabular data with human-approved corrections."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "Data Quality Copilot contributors" }]
+
+dependencies = [
+    "streamlit>=1.40,<2",
+    "pandas>=2.2,<3",
+    "numpy>=1.26,<3",
+    "openpyxl>=3.1",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.5",
+    "python-dateutil>=2.9",
+    "email-validator>=2.2",
+    "PyYAML>=6.0",
+    "Jinja2>=3.1",
+    "plotly>=5.24,<8",
+    "SQLAlchemy>=2.0,<3",
+    "alembic>=1.13,<2",
+    "psycopg[binary]>=3.2,<4",
+    "anthropic>=0.40",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=5.0",
+    "ruff>=0.7",
+    "mypy>=1.11",
+    "pandas-stubs>=2.2",
+    "types-PyYAML>=6.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+dqcopilot = ["py.typed", "rules/*.yaml", "reporting/templates/*.html"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests", "app", "scripts"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "C4",  # comprehensions
+    "SIM", # simplify
+    "ANN", # annotations
+    "D",   # pydocstyle
+]
+ignore = [
+    "D100", # missing docstring in public module (kept optional for small modules)
+    "D104", # missing docstring in public package
+    "D107", # missing docstring in __init__
+    "ANN401",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D", "ANN"]
+"scripts/*" = ["D103"]
+"alembic/*" = ["D", "ANN"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.mypy]
+python_version = "3.12"
+packages = ["dqcopilot"]
+mypy_path = "src"
+strict = false
+warn_unused_ignores = true
+warn_redundant_casts = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["tests.*", "scripts.*", "app.*"]
+disallow_untyped_defs = false
+
+# The demo data generator writes strings, floats and dates into the same object-dtype
+# columns on purpose - that is what produces the messy data. pandas-stubs types every
+# `.at[]` access as a wide union, so these two codes report the intended behaviour as
+# an error. Everything else stays checked.
+[[tool.mypy.overrides]]
+module = ["dqcopilot.demodata.*"]
+disable_error_code = ["assignment", "arg-type"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+markers = [
+    "db: tests that require a live database engine (SQLite by default)",
+    "e2e: end-to-end service-layer tests",
+]

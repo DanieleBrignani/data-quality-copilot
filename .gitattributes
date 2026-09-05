@@ -1,0 +1,31 @@
+# Normalise line endings in the repository to LF.
+#
+# This is not cosmetic. `docker/entrypoint.sh` runs inside a Linux container: if it is
+# checked out with CRLF endings on a Windows machine, the shebang becomes
+# `/usr/bin/env bash\r` and the container dies with "bad interpreter". Forcing LF for
+# shell scripts (and everything else text) makes a Windows clone build correctly.
+
+* text=auto eol=lf
+
+# Scripts and container files must always be LF, whatever the platform.
+*.sh          text eol=lf
+Dockerfile    text eol=lf
+*.yml         text eol=lf
+*.yaml        text eol=lf
+
+# Windows-native helpers keep CRLF.
+*.bat         text eol=crlf
+*.cmd         text eol=crlf
+*.ps1         text eol=crlf
+
+# Binary files must never be touched.
+*.png         binary
+*.jpg         binary
+*.jpeg        binary
+*.gif         binary
+*.ico         binary
+*.xlsx        binary
+*.xls         binary
+*.pdf         binary
+*.db          binary
+*.sqlite3     binary

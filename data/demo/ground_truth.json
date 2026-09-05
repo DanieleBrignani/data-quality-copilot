@@ -1,0 +1,1187 @@
+{
+  "seed": 20240601,
+  "generator_version": 1,
+  "disclaimer": "Fully synthetic data. Every name, company, email and identifier is fabricated and resolves to nothing real.",
+  "datasets": {
+    "customers": {
+      "rows": 220,
+      "columns": [
+        "customer_id",
+        "full_name",
+        "email",
+        "country",
+        "segment",
+        "age",
+        "signup_date",
+        "revenue",
+        "is_active"
+      ]
+    },
+    "sales": {
+      "rows": 300,
+      "columns": [
+        "order_id",
+        "customer_id",
+        "order_date",
+        "delivery_date",
+        "product_category",
+        "quantity",
+        "unit_price",
+        "discount_percent",
+        "total_amount",
+        "status",
+        "currency"
+      ]
+    },
+    "suppliers": {
+      "rows": 120,
+      "columns": [
+        "supplier_id",
+        "supplier_name",
+        "contact_email",
+        "country",
+        "vat_number",
+        "onboarded_on",
+        "annual_spend",
+        "rating"
+      ]
+    }
+  },
+  "seeded_errors": [
+    {
+      "dataset": "customers",
+      "row": 3,
+      "column": "email",
+      "issue_type": "missing_values",
+      "description": "Email removed",
+      "original_value": "sven.rossi@example.com",
+      "injected_value": null
+    },
+    {
+      "dataset": "customers",
+      "row": 17,
+      "column": "email",
+      "issue_type": "missing_values",
+      "description": "Email removed",
+      "original_value": "rosa.martin@example.com",
+      "injected_value": null
+    },
+    {
+      "dataset": "customers",
+      "row": 42,
+      "column": "email",
+      "issue_type": "missing_values",
+      "description": "Email removed",
+      "original_value": "alice.bakker@example.com",
+      "injected_value": null
+    },
+    {
+      "dataset": "customers",
+      "row": 88,
+      "column": "email",
+      "issue_type": "missing_values",
+      "description": "Email removed",
+      "original_value": "teresa.dupont@example.com",
+      "injected_value": null
+    },
+    {
+      "dataset": "customers",
+      "row": 130,
+      "column": "email",
+      "issue_type": "missing_values",
+      "description": "Email removed",
+      "original_value": "jonas.nilsson@example.com",
+      "injected_value": null
+    },
+    {
+      "dataset": "customers",
+      "row": 11,
+      "column": "country",
+      "issue_type": "missing_values",
+      "description": "Country blanked",
+      "original_value": "IT",
+      "injected_value": null
+    },
+    {
+      "dataset": "customers",
+      "row": 59,
+      "column": "country",
+      "issue_type": "missing_values",
+      "description": "Country blanked",
+      "original_value": "DE",
+      "injected_value": null
+    },
+    {
+      "dataset": "customers",
+      "row": 121,
+      "column": "country",
+      "issue_type": "missing_values",
+      "description": "Country blanked",
+      "original_value": "ES",
+      "injected_value": null
+    },
+    {
+      "dataset": "customers",
+      "row": 7,
+      "column": "segment",
+      "issue_type": "missing_values",
+      "description": "Segment set to placeholder",
+      "original_value": null,
+      "injected_value": null
+    },
+    {
+      "dataset": "customers",
+      "row": 64,
+      "column": "segment",
+      "issue_type": "missing_values",
+      "description": "Segment set to placeholder",
+      "original_value": null,
+      "injected_value": null
+    },
+    {
+      "dataset": "customers",
+      "row": 5,
+      "column": "email",
+      "issue_type": "invalid_email",
+      "description": "Malformed email",
+      "original_value": "elena.kowalski@example.com",
+      "injected_value": "alice.martin@"
+    },
+    {
+      "dataset": "customers",
+      "row": 23,
+      "column": "email",
+      "issue_type": "invalid_email",
+      "description": "Malformed email",
+      "original_value": "francois.kowalski@example.com",
+      "injected_value": "bruno.dupont.example.com"
+    },
+    {
+      "dataset": "customers",
+      "row": 61,
+      "column": "email",
+      "issue_type": "invalid_email",
+      "description": "Malformed email",
+      "original_value": "luca.rossi@example.com",
+      "injected_value": "chloe@@example.com"
+    },
+    {
+      "dataset": "customers",
+      "row": 95,
+      "column": "email",
+      "issue_type": "invalid_email",
+      "description": "Malformed email",
+      "original_value": "elena.jensen@example.com",
+      "injected_value": "david.weber@example"
+    },
+    {
+      "dataset": "customers",
+      "row": 140,
+      "column": "email",
+      "issue_type": "invalid_email",
+      "description": "Malformed email",
+      "original_value": "luca.silva@example.com",
+      "injected_value": "elena rossi@example.com"
+    },
+    {
+      "dataset": "customers",
+      "row": 2,
+      "column": "country",
+      "issue_type": "inconsistent_category",
+      "description": "Country variant",
+      "original_value": "IT",
+      "injected_value": "Italy"
+    },
+    {
+      "dataset": "customers",
+      "row": 14,
+      "column": "country",
+      "issue_type": "inconsistent_category",
+      "description": "Country variant",
+      "original_value": "DE",
+      "injected_value": "DEU"
+    },
+    {
+      "dataset": "customers",
+      "row": 47,
+      "column": "country",
+      "issue_type": "inconsistent_category",
+      "description": "Country variant",
+      "original_value": "IT",
+      "injected_value": "it"
+    },
+    {
+      "dataset": "customers",
+      "row": 70,
+      "column": "country",
+      "issue_type": "inconsistent_category",
+      "description": "Country variant",
+      "original_value": "DE",
+      "injected_value": "Germany"
+    },
+    {
+      "dataset": "customers",
+      "row": 155,
+      "column": "country",
+      "issue_type": "inconsistent_category",
+      "description": "Country variant",
+      "original_value": "IT",
+      "injected_value": "ITA"
+    },
+    {
+      "dataset": "customers",
+      "row": 1,
+      "column": "full_name",
+      "issue_type": "leading_trailing_whitespace",
+      "description": "Padded name",
+      "original_value": "Nils Costa",
+      "injected_value": "  Nils Costa "
+    },
+    {
+      "dataset": "customers",
+      "row": 26,
+      "column": "full_name",
+      "issue_type": "leading_trailing_whitespace",
+      "description": "Padded name",
+      "original_value": "Ulrich Costa",
+      "injected_value": "  Ulrich Costa "
+    },
+    {
+      "dataset": "customers",
+      "row": 55,
+      "column": "full_name",
+      "issue_type": "leading_trailing_whitespace",
+      "description": "Padded name",
+      "original_value": "David Costa",
+      "injected_value": "  David Costa "
+    },
+    {
+      "dataset": "customers",
+      "row": 102,
+      "column": "full_name",
+      "issue_type": "leading_trailing_whitespace",
+      "description": "Padded name",
+      "original_value": "Hugo Silva",
+      "injected_value": "  Hugo Silva "
+    },
+    {
+      "dataset": "customers",
+      "row": 148,
+      "column": "full_name",
+      "issue_type": "leading_trailing_whitespace",
+      "description": "Padded name",
+      "original_value": "Pablo Dupont",
+      "injected_value": "  Pablo Dupont "
+    },
+    {
+      "dataset": "customers",
+      "row": 9,
+      "column": "full_name",
+      "issue_type": "inconsistent_capitalization",
+      "description": "Upper-cased name",
+      "original_value": "Nils Nilsson",
+      "injected_value": "NILS NILSSON"
+    },
+    {
+      "dataset": "customers",
+      "row": 38,
+      "column": "full_name",
+      "issue_type": "inconsistent_capitalization",
+      "description": "Upper-cased name",
+      "original_value": "Katarina Bakker",
+      "injected_value": "KATARINA BAKKER"
+    },
+    {
+      "dataset": "customers",
+      "row": 77,
+      "column": "full_name",
+      "issue_type": "inconsistent_capitalization",
+      "description": "Upper-cased name",
+      "original_value": "Marta Weber",
+      "injected_value": "MARTA WEBER"
+    },
+    {
+      "dataset": "customers",
+      "row": 119,
+      "column": "full_name",
+      "issue_type": "inconsistent_capitalization",
+      "description": "Upper-cased name",
+      "original_value": "Olivia Novak",
+      "injected_value": "OLIVIA NOVAK"
+    },
+    {
+      "dataset": "customers",
+      "row": 163,
+      "column": "full_name",
+      "issue_type": "inconsistent_capitalization",
+      "description": "Upper-cased name",
+      "original_value": "Elena Martin",
+      "injected_value": "ELENA MARTIN"
+    },
+    {
+      "dataset": "customers",
+      "row": 12,
+      "column": "age",
+      "issue_type": "impossible_numeric",
+      "description": "Age outside 0-120",
+      "original_value": "75",
+      "injected_value": "0"
+    },
+    {
+      "dataset": "customers",
+      "row": 44,
+      "column": "age",
+      "issue_type": "impossible_numeric",
+      "description": "Age outside 0-120",
+      "original_value": "43",
+      "injected_value": "199"
+    },
+    {
+      "dataset": "customers",
+      "row": 83,
+      "column": "age",
+      "issue_type": "impossible_numeric",
+      "description": "Age outside 0-120",
+      "original_value": "48",
+      "injected_value": "-5"
+    },
+    {
+      "dataset": "customers",
+      "row": 167,
+      "column": "age",
+      "issue_type": "impossible_numeric",
+      "description": "Age outside 0-120",
+      "original_value": "47",
+      "injected_value": "150"
+    },
+    {
+      "dataset": "customers",
+      "row": 8,
+      "column": "revenue",
+      "issue_type": "impossible_numeric",
+      "description": "Revenue made negative",
+      "original_value": "25309.73",
+      "injected_value": "-25309.73"
+    },
+    {
+      "dataset": "customers",
+      "row": 51,
+      "column": "revenue",
+      "issue_type": "impossible_numeric",
+      "description": "Revenue made negative",
+      "original_value": "89001.78",
+      "injected_value": "-89001.78"
+    },
+    {
+      "dataset": "customers",
+      "row": 96,
+      "column": "revenue",
+      "issue_type": "impossible_numeric",
+      "description": "Revenue made negative",
+      "original_value": "83987.38",
+      "injected_value": "-83987.38"
+    },
+    {
+      "dataset": "customers",
+      "row": 134,
+      "column": "revenue",
+      "issue_type": "impossible_numeric",
+      "description": "Revenue made negative",
+      "original_value": "46300.61",
+      "injected_value": "-46300.61"
+    },
+    {
+      "dataset": "customers",
+      "row": 20,
+      "column": "revenue",
+      "issue_type": "numeric_stored_as_text",
+      "description": "Currency symbol added",
+      "original_value": "86,756.47",
+      "injected_value": "€ 86,756.47"
+    },
+    {
+      "dataset": "customers",
+      "row": 73,
+      "column": "revenue",
+      "issue_type": "numeric_stored_as_text",
+      "description": "Currency symbol added",
+      "original_value": "69,950.02",
+      "injected_value": "€ 69,950.02"
+    },
+    {
+      "dataset": "customers",
+      "row": 110,
+      "column": "revenue",
+      "issue_type": "numeric_stored_as_text",
+      "description": "Currency symbol added",
+      "original_value": "53,229.77",
+      "injected_value": "€ 53,229.77"
+    },
+    {
+      "dataset": "customers",
+      "row": 35,
+      "column": "revenue",
+      "issue_type": "mixed_datatypes",
+      "description": "Number written as words",
+      "original_value": "22,010.31",
+      "injected_value": "approx 500"
+    },
+    {
+      "dataset": "customers",
+      "row": 128,
+      "column": "revenue",
+      "issue_type": "mixed_datatypes",
+      "description": "Number written as words",
+      "original_value": "82,402.49",
+      "injected_value": "twelve"
+    },
+    {
+      "dataset": "customers",
+      "row": -1,
+      "column": "revenue",
+      "issue_type": "numeric_stored_as_text",
+      "description": "Whole revenue column stored as text",
+      "original_value": null,
+      "injected_value": null
+    },
+    {
+      "dataset": "customers",
+      "row": 4,
+      "column": "signup_date",
+      "issue_type": "inconsistent_date_format",
+      "description": "Reformatted to DD/MM/YYYY",
+      "original_value": "2023-08-22",
+      "injected_value": "22/08/2023"
+    },
+    {
+      "dataset": "customers",
+      "row": 29,
+      "column": "signup_date",
+      "issue_type": "inconsistent_date_format",
+      "description": "Reformatted to DD/MM/YYYY",
+      "original_value": "2024-02-01",
+      "injected_value": "01/02/2024"
+    },
+    {
+      "dataset": "customers",
+      "row": 66,
+      "column": "signup_date",
+      "issue_type": "inconsistent_date_format",
+      "description": "Reformatted to DD/MM/YYYY",
+      "original_value": "2023-01-07",
+      "injected_value": "07/01/2023"
+    },
+    {
+      "dataset": "customers",
+      "row": 113,
+      "column": "signup_date",
+      "issue_type": "inconsistent_date_format",
+      "description": "Reformatted to DD/MM/YYYY",
+      "original_value": "2024-06-14",
+      "injected_value": "14/06/2024"
+    },
+    {
+      "dataset": "customers",
+      "row": 158,
+      "column": "signup_date",
+      "issue_type": "inconsistent_date_format",
+      "description": "Reformatted to DD/MM/YYYY",
+      "original_value": "2022-03-14",
+      "injected_value": "14/03/2022"
+    },
+    {
+      "dataset": "customers",
+      "row": 16,
+      "column": "signup_date",
+      "issue_type": "invalid_date",
+      "description": "Impossible date",
+      "original_value": "2022-01-18",
+      "injected_value": "2023-02-30"
+    },
+    {
+      "dataset": "customers",
+      "row": 87,
+      "column": "signup_date",
+      "issue_type": "invalid_date",
+      "description": "Impossible date",
+      "original_value": "2023-02-07",
+      "injected_value": "2024-13-01"
+    },
+    {
+      "dataset": "customers",
+      "row": 145,
+      "column": "signup_date",
+      "issue_type": "invalid_date",
+      "description": "Impossible date",
+      "original_value": "2023-08-14",
+      "injected_value": "not a date"
+    },
+    {
+      "dataset": "customers",
+      "row": 31,
+      "column": "signup_date",
+      "issue_type": "future_date",
+      "description": "Date moved to the future",
+      "original_value": "2024-03-21",
+      "injected_value": "2027-10-04"
+    },
+    {
+      "dataset": "customers",
+      "row": 104,
+      "column": "signup_date",
+      "issue_type": "future_date",
+      "description": "Date moved to the future",
+      "original_value": "2023-09-14",
+      "injected_value": "2027-10-04"
+    },
+    {
+      "dataset": "customers",
+      "row": 200,
+      "column": null,
+      "issue_type": "exact_duplicate_rows",
+      "description": "Exact copy of row 10",
+      "original_value": null,
+      "injected_value": null
+    },
+    {
+      "dataset": "customers",
+      "row": 201,
+      "column": null,
+      "issue_type": "exact_duplicate_rows",
+      "description": "Exact copy of row 25",
+      "original_value": null,
+      "injected_value": null
+    },
+    {
+      "dataset": "customers",
+      "row": 202,
+      "column": null,
+      "issue_type": "probable_duplicate_rows",
+      "description": "Same customer as row 40, re-entered with different formatting",
+      "original_value": "Chloé Andersen",
+      "injected_value": "chloé andersen"
+    },
+    {
+      "dataset": "customers",
+      "row": 203,
+      "column": null,
+      "issue_type": "probable_duplicate_rows",
+      "description": "Same customer as row 57, re-entered with different formatting",
+      "original_value": "Olivia Martin",
+      "injected_value": "olivia martin"
+    },
+    {
+      "dataset": "sales",
+      "row": 6,
+      "column": "total_amount",
+      "issue_type": "missing_values",
+      "description": "Amount removed",
+      "original_value": "22021.74",
+      "injected_value": null
+    },
+    {
+      "dataset": "sales",
+      "row": 48,
+      "column": "total_amount",
+      "issue_type": "missing_values",
+      "description": "Amount removed",
+      "original_value": "5122.86",
+      "injected_value": null
+    },
+    {
+      "dataset": "sales",
+      "row": 133,
+      "column": "total_amount",
+      "issue_type": "missing_values",
+      "description": "Amount removed",
+      "original_value": "14251.68",
+      "injected_value": null
+    },
+    {
+      "dataset": "sales",
+      "row": 210,
+      "column": "total_amount",
+      "issue_type": "missing_values",
+      "description": "Amount removed",
+      "original_value": "1268.25",
+      "injected_value": null
+    },
+    {
+      "dataset": "sales",
+      "row": 266,
+      "column": "total_amount",
+      "issue_type": "missing_values",
+      "description": "Amount removed",
+      "original_value": "6299.92",
+      "injected_value": null
+    },
+    {
+      "dataset": "sales",
+      "row": 19,
+      "column": "customer_id",
+      "issue_type": "missing_values",
+      "description": "Customer link removed",
+      "original_value": "CUST-00022",
+      "injected_value": null
+    },
+    {
+      "dataset": "sales",
+      "row": 155,
+      "column": "customer_id",
+      "issue_type": "missing_values",
+      "description": "Customer link removed",
+      "original_value": "CUST-00132",
+      "injected_value": null
+    },
+    {
+      "dataset": "sales",
+      "row": 13,
+      "column": "total_amount",
+      "issue_type": "impossible_numeric",
+      "description": "Amount made negative",
+      "original_value": "1989.3",
+      "injected_value": "-1989.3"
+    },
+    {
+      "dataset": "sales",
+      "row": 72,
+      "column": "total_amount",
+      "issue_type": "impossible_numeric",
+      "description": "Amount made negative",
+      "original_value": "2769.54",
+      "injected_value": "-2769.54"
+    },
+    {
+      "dataset": "sales",
+      "row": 189,
+      "column": "total_amount",
+      "issue_type": "impossible_numeric",
+      "description": "Amount made negative",
+      "original_value": "15355.74",
+      "injected_value": "-15355.74"
+    },
+    {
+      "dataset": "sales",
+      "row": 245,
+      "column": "total_amount",
+      "issue_type": "impossible_numeric",
+      "description": "Amount made negative",
+      "original_value": "8469.24",
+      "injected_value": "-8469.24"
+    },
+    {
+      "dataset": "sales",
+      "row": 27,
+      "column": "quantity",
+      "issue_type": "business_rule_violation",
+      "description": "Quantity outside 1-10000",
+      "original_value": "33",
+      "injected_value": "0"
+    },
+    {
+      "dataset": "sales",
+      "row": 91,
+      "column": "quantity",
+      "issue_type": "business_rule_violation",
+      "description": "Quantity outside 1-10000",
+      "original_value": "15",
+      "injected_value": "-3"
+    },
+    {
+      "dataset": "sales",
+      "row": 174,
+      "column": "quantity",
+      "issue_type": "business_rule_violation",
+      "description": "Quantity outside 1-10000",
+      "original_value": "4",
+      "injected_value": "99999"
+    },
+    {
+      "dataset": "sales",
+      "row": 36,
+      "column": "discount_percent",
+      "issue_type": "business_rule_violation",
+      "description": "Discount outside 0-100",
+      "original_value": "5",
+      "injected_value": "120"
+    },
+    {
+      "dataset": "sales",
+      "row": 203,
+      "column": "discount_percent",
+      "issue_type": "business_rule_violation",
+      "description": "Discount outside 0-100",
+      "original_value": "0",
+      "injected_value": "-10"
+    },
+    {
+      "dataset": "sales",
+      "row": 22,
+      "column": "total_amount",
+      "issue_type": "numeric_stored_as_text",
+      "description": "Dollar sign added",
+      "original_value": "7,417.44",
+      "injected_value": "$7,417.44"
+    },
+    {
+      "dataset": "sales",
+      "row": 118,
+      "column": "total_amount",
+      "issue_type": "numeric_stored_as_text",
+      "description": "Dollar sign added",
+      "original_value": "5,733.36",
+      "injected_value": "$5,733.36"
+    },
+    {
+      "dataset": "sales",
+      "row": 231,
+      "column": "total_amount",
+      "issue_type": "numeric_stored_as_text",
+      "description": "Dollar sign added",
+      "original_value": "8,293.96",
+      "injected_value": "$8,293.96"
+    },
+    {
+      "dataset": "sales",
+      "row": 55,
+      "column": "total_amount",
+      "issue_type": "numeric_stored_as_text",
+      "description": "European separators",
+      "original_value": "3,492.68",
+      "injected_value": "3.492,68"
+    },
+    {
+      "dataset": "sales",
+      "row": 198,
+      "column": "total_amount",
+      "issue_type": "numeric_stored_as_text",
+      "description": "European separators",
+      "original_value": "1,816.85",
+      "injected_value": "1.816,85"
+    },
+    {
+      "dataset": "sales",
+      "row": 9,
+      "column": "order_date",
+      "issue_type": "inconsistent_date_format",
+      "description": "Reformatted to MM/DD/YYYY",
+      "original_value": "2024-03-12",
+      "injected_value": "03/12/2024"
+    },
+    {
+      "dataset": "sales",
+      "row": 84,
+      "column": "order_date",
+      "issue_type": "inconsistent_date_format",
+      "description": "Reformatted to MM/DD/YYYY",
+      "original_value": "2023-04-02",
+      "injected_value": "04/02/2023"
+    },
+    {
+      "dataset": "sales",
+      "row": 167,
+      "column": "order_date",
+      "issue_type": "inconsistent_date_format",
+      "description": "Reformatted to MM/DD/YYYY",
+      "original_value": "2024-08-29",
+      "injected_value": "08/29/2024"
+    },
+    {
+      "dataset": "sales",
+      "row": 250,
+      "column": "order_date",
+      "issue_type": "inconsistent_date_format",
+      "description": "Reformatted to MM/DD/YYYY",
+      "original_value": "2023-07-05",
+      "injected_value": "07/05/2023"
+    },
+    {
+      "dataset": "sales",
+      "row": 41,
+      "column": "order_date",
+      "issue_type": "invalid_date",
+      "description": "Impossible date",
+      "original_value": "2024-04-20",
+      "injected_value": "2023-06-31"
+    },
+    {
+      "dataset": "sales",
+      "row": 122,
+      "column": "order_date",
+      "issue_type": "invalid_date",
+      "description": "Impossible date",
+      "original_value": "2023-09-01",
+      "injected_value": "31/12/2023 25:00"
+    },
+    {
+      "dataset": "sales",
+      "row": 63,
+      "column": "order_date",
+      "issue_type": "future_date",
+      "description": "Order date in the future",
+      "original_value": "2024-04-03",
+      "injected_value": "2027-03-18"
+    },
+    {
+      "dataset": "sales",
+      "row": 209,
+      "column": "order_date",
+      "issue_type": "future_date",
+      "description": "Order date in the future",
+      "original_value": "2023-10-26",
+      "injected_value": "2027-03-18"
+    },
+    {
+      "dataset": "sales",
+      "row": 77,
+      "column": "delivery_date",
+      "issue_type": "business_rule_violation",
+      "description": "Delivery before order",
+      "original_value": "2024-01-06",
+      "injected_value": "2023-12-18"
+    },
+    {
+      "dataset": "sales",
+      "row": 181,
+      "column": "delivery_date",
+      "issue_type": "business_rule_violation",
+      "description": "Delivery before order",
+      "original_value": "2024-05-07",
+      "injected_value": "2024-04-12"
+    },
+    {
+      "dataset": "sales",
+      "row": 15,
+      "column": "product_category",
+      "issue_type": "inconsistent_capitalization",
+      "description": "Lower-cased category",
+      "original_value": "Hardware",
+      "injected_value": "hardware"
+    },
+    {
+      "dataset": "sales",
+      "row": 68,
+      "column": "product_category",
+      "issue_type": "inconsistent_capitalization",
+      "description": "Lower-cased category",
+      "original_value": "Software",
+      "injected_value": "software"
+    },
+    {
+      "dataset": "sales",
+      "row": 143,
+      "column": "product_category",
+      "issue_type": "inconsistent_capitalization",
+      "description": "Lower-cased category",
+      "original_value": "Services",
+      "injected_value": "services"
+    },
+    {
+      "dataset": "sales",
+      "row": 220,
+      "column": "product_category",
+      "issue_type": "inconsistent_capitalization",
+      "description": "Lower-cased category",
+      "original_value": "Hardware",
+      "injected_value": "hardware"
+    },
+    {
+      "dataset": "sales",
+      "row": 30,
+      "column": "status",
+      "issue_type": "inconsistent_capitalization",
+      "description": "Upper-cased status",
+      "original_value": "delivered",
+      "injected_value": "DELIVERED"
+    },
+    {
+      "dataset": "sales",
+      "row": 159,
+      "column": "status",
+      "issue_type": "inconsistent_capitalization",
+      "description": "Upper-cased status",
+      "original_value": "confirmed",
+      "injected_value": "CONFIRMED"
+    },
+    {
+      "dataset": "sales",
+      "row": 52,
+      "column": "status",
+      "issue_type": "business_rule_violation",
+      "description": "Status outside the vocabulary",
+      "original_value": "pending",
+      "injected_value": "in transit"
+    },
+    {
+      "dataset": "sales",
+      "row": 212,
+      "column": "status",
+      "issue_type": "business_rule_violation",
+      "description": "Status outside the vocabulary",
+      "original_value": "shipped",
+      "injected_value": "COMPLETE"
+    },
+    {
+      "dataset": "sales",
+      "row": 290,
+      "column": null,
+      "issue_type": "exact_duplicate_rows",
+      "description": "Exact copy of row 100",
+      "original_value": null,
+      "injected_value": null
+    },
+    {
+      "dataset": "sales",
+      "row": 291,
+      "column": null,
+      "issue_type": "exact_duplicate_rows",
+      "description": "Exact copy of row 140",
+      "original_value": null,
+      "injected_value": null
+    },
+    {
+      "dataset": "sales",
+      "row": 292,
+      "column": null,
+      "issue_type": "exact_duplicate_rows",
+      "description": "Exact copy of row 175",
+      "original_value": null,
+      "injected_value": null
+    },
+    {
+      "dataset": "sales",
+      "row": -1,
+      "column": "currency",
+      "issue_type": "constant_column",
+      "description": "Currency is the same on every row",
+      "original_value": null,
+      "injected_value": null
+    },
+    {
+      "dataset": "suppliers",
+      "row": 110,
+      "column": null,
+      "issue_type": "probable_duplicate_rows",
+      "description": "Same company as row 4, written differently",
+      "original_value": "Wayne GmbH",
+      "injected_value": "WAYNE GMBH"
+    },
+    {
+      "dataset": "suppliers",
+      "row": 111,
+      "column": null,
+      "issue_type": "probable_duplicate_rows",
+      "description": "Same company as row 18, written differently",
+      "original_value": "Stark AB",
+      "injected_value": "stark  ab"
+    },
+    {
+      "dataset": "suppliers",
+      "row": 112,
+      "column": null,
+      "issue_type": "probable_duplicate_rows",
+      "description": "Same company as row 37, written differently",
+      "original_value": "Northwind BV",
+      "injected_value": "Northwind S.BV"
+    },
+    {
+      "dataset": "suppliers",
+      "row": 113,
+      "column": null,
+      "issue_type": "probable_duplicate_rows",
+      "description": "Same company as row 55, written differently",
+      "original_value": "Hooli SAS",
+      "injected_value": "  hooli sas "
+    },
+    {
+      "dataset": "suppliers",
+      "row": 114,
+      "column": null,
+      "issue_type": "probable_duplicate_rows",
+      "description": "Same company as row 71, written differently",
+      "original_value": "Tyrell Oy",
+      "injected_value": "TyrellOy"
+    },
+    {
+      "dataset": "suppliers",
+      "row": 2,
+      "column": "contact_email",
+      "issue_type": "missing_values",
+      "description": "Contact email removed",
+      "original_value": "contact@vandelay-3.example.com",
+      "injected_value": null
+    },
+    {
+      "dataset": "suppliers",
+      "row": 29,
+      "column": "contact_email",
+      "issue_type": "missing_values",
+      "description": "Contact email removed",
+      "original_value": "contact@stark-30.example.com",
+      "injected_value": null
+    },
+    {
+      "dataset": "suppliers",
+      "row": 63,
+      "column": "contact_email",
+      "issue_type": "missing_values",
+      "description": "Contact email removed",
+      "original_value": "contact@globex-64.example.com",
+      "injected_value": null
+    },
+    {
+      "dataset": "suppliers",
+      "row": 98,
+      "column": "contact_email",
+      "issue_type": "missing_values",
+      "description": "Contact email removed",
+      "original_value": "contact@umbrella-99.example.com",
+      "injected_value": null
+    },
+    {
+      "dataset": "suppliers",
+      "row": 11,
+      "column": "vat_number",
+      "issue_type": "missing_values",
+      "description": "VAT number removed",
+      "original_value": "DE363271255",
+      "injected_value": null
+    },
+    {
+      "dataset": "suppliers",
+      "row": 77,
+      "column": "vat_number",
+      "issue_type": "missing_values",
+      "description": "VAT number removed",
+      "original_value": "ES302101251",
+      "injected_value": null
+    },
+    {
+      "dataset": "suppliers",
+      "row": 7,
+      "column": "vat_number",
+      "issue_type": "business_rule_violation",
+      "description": "VAT number does not match the pattern",
+      "original_value": "DE280033416",
+      "injected_value": "123456789"
+    },
+    {
+      "dataset": "suppliers",
+      "row": 44,
+      "column": "vat_number",
+      "issue_type": "business_rule_violation",
+      "description": "VAT number does not match the pattern",
+      "original_value": "NL528837378",
+      "injected_value": "FR-123"
+    },
+    {
+      "dataset": "suppliers",
+      "row": 86,
+      "column": "vat_number",
+      "issue_type": "business_rule_violation",
+      "description": "VAT number does not match the pattern",
+      "original_value": "PT967265970",
+      "injected_value": "fr123456789"
+    },
+    {
+      "dataset": "suppliers",
+      "row": 13,
+      "column": "contact_email",
+      "issue_type": "invalid_email",
+      "description": "Malformed email",
+      "original_value": "contact@initech-14.example.com",
+      "injected_value": "contact@"
+    },
+    {
+      "dataset": "suppliers",
+      "row": 52,
+      "column": "contact_email",
+      "issue_type": "invalid_email",
+      "description": "Malformed email",
+      "original_value": "contact@northwind-53.example.com",
+      "injected_value": "no-at-sign.example.com"
+    },
+    {
+      "dataset": "suppliers",
+      "row": 8,
+      "column": "country",
+      "issue_type": "inconsistent_category",
+      "description": "Country variant",
+      "original_value": "ES",
+      "injected_value": "Spain"
+    },
+    {
+      "dataset": "suppliers",
+      "row": 34,
+      "column": "country",
+      "issue_type": "inconsistent_category",
+      "description": "Country variant",
+      "original_value": "IT",
+      "injected_value": "it"
+    },
+    {
+      "dataset": "suppliers",
+      "row": 69,
+      "column": "country",
+      "issue_type": "inconsistent_category",
+      "description": "Country variant",
+      "original_value": "DE",
+      "injected_value": "de"
+    },
+    {
+      "dataset": "suppliers",
+      "row": 92,
+      "column": "country",
+      "issue_type": "inconsistent_category",
+      "description": "Country variant",
+      "original_value": "DE",
+      "injected_value": "DEU"
+    },
+    {
+      "dataset": "suppliers",
+      "row": 5,
+      "column": "annual_spend",
+      "issue_type": "numeric_stored_as_text",
+      "description": "Pound sign added",
+      "original_value": "157,717.05",
+      "injected_value": "£157,717.05"
+    },
+    {
+      "dataset": "suppliers",
+      "row": 40,
+      "column": "annual_spend",
+      "issue_type": "numeric_stored_as_text",
+      "description": "Pound sign added",
+      "original_value": "238,222.45",
+      "injected_value": "£238,222.45"
+    },
+    {
+      "dataset": "suppliers",
+      "row": 81,
+      "column": "annual_spend",
+      "issue_type": "numeric_stored_as_text",
+      "description": "Pound sign added",
+      "original_value": "116,899.66",
+      "injected_value": "£116,899.66"
+    },
+    {
+      "dataset": "suppliers",
+      "row": 23,
+      "column": "onboarded_on",
+      "issue_type": "future_date",
+      "description": "Onboarding date in the future",
+      "original_value": "2020-12-29",
+      "injected_value": "2026-11-28"
+    },
+    {
+      "dataset": "suppliers",
+      "row": 58,
+      "column": "onboarded_on",
+      "issue_type": "invalid_date",
+      "description": "Impossible date",
+      "original_value": "2020-10-04",
+      "injected_value": "2021-02-30"
+    }
+  ],
+  "seeded_error_count": 126
+}

@@ -1,0 +1,39 @@
+# Secrets - must never enter the build context
+.env
+.env.*
+!.env.example
+
+# Version control and CI
+.git/
+.github/
+.gitignore
+
+# Local environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local runtime artifacts
+*.db
+*.sqlite3
+exports/
+data/demo/
+
+# Tests are not needed in the runtime image
+tests/
+
+# Editors / OS
+.vscode/
+.idea/
+.claude/
+.DS_Store
+Thumbs.db

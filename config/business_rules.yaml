@@ -1,0 +1,131 @@
+# Configurable business rules for the Data Quality Copilot.
+#
+# Rules are evaluated by deterministic Python code, never by the language model.
+# A rule whose columns are absent from the uploaded dataset is skipped, not failed,
+# so this single file can serve every demo dataset.
+#
+# Supported types: not_null | range | allowed_values | no_future_dates | regex |
+#                  unique | comparison
+# Severities:      critical | high | medium | low | info
+
+version: 1
+name: demo-default
+description: >
+  Default rules used by the demo datasets (customers, sales, suppliers).
+  Edit this file to match your own domain - no Python change is required.
+
+rules:
+  # --- Mandatory fields -----------------------------------------------------
+  - name: customer_id_required
+    type: not_null
+    column: customer_id
+    severity: critical
+    description: Every customer record must be identifiable.
+
+  - name: customer_id_unique
+    type: unique
+    columns: [customer_id]
+    severity: critical
+    description: A customer identifier must never be reused.
+
+  - name: supplier_id_required
+    type: not_null
+    column: supplier_id
+    severity: critical
+
+  - name: order_id_required
+    type: not_null
+    column: order_id
+    severity: critical
+
+  # --- Numeric plausibility -------------------------------------------------
+  - name: revenue_not_negative
+    type: range
+    column: revenue
+    minimum: 0
+    severity: high
+    description: Revenue is recorded gross; refunds belong in their own column.
+
+  - name: total_amount_not_negative
+    type: range
+    column: total_amount
+    minimum: 0
+    severity: high
+
+  - name: unit_price_not_negative
+    type: range
+    column: unit_price
+    minimum: 0
+    severity: high
+
+  - name: quantity_positive
+    type: range
+    column: quantity
+    minimum: 1
+    maximum: 10000
+    severity: high
+
+  - name: age_is_plausible
+    type: range
+    column: age
+    minimum: 0
+    maximum: 120
+    severity: high
+    description: Ages outside 0-120 indicate a typo or a placeholder value.
+
+  - name: discount_percent_in_range
+    type: range
+    column: discount_percent
+    minimum: 0
+    maximum: 100
+    severity: medium
+
+  # --- Dates ----------------------------------------------------------------
+  - name: signup_date_not_in_future
+    type: no_future_dates
+    column: signup_date
+    severity: high
+
+  - name: order_date_not_in_future
+    type: no_future_dates
+    column: order_date
+    severity: high
+
+  - name: delivery_after_order
+    type: comparison
+    left: delivery_date
+    operator: ">="
+    right: order_date
+    compare_as: date
+    severity: high
+    description: A delivery cannot happen before the order that caused it.
+
+  # --- Vocabularies ---------------------------------------------------------
+  - name: country_is_known
+    type: allowed_values
+    column: country
+    case_sensitive: false
+    severity: medium
+    values: [FR, DE, IT, ES, BE, NL, PT, UK, IE, PL, SE, US, CA]
+
+  - name: order_status_is_known
+    type: allowed_values
+    column: status
+    case_sensitive: false
+    severity: medium
+    values: [pending, confirmed, shipped, delivered, cancelled, refunded]
+
+  - name: segment_is_known
+    type: allowed_values
+    column: segment
+    case_sensitive: false
+    severity: low
+    values: [enterprise, mid-market, smb, public sector]
+
+  # --- Formats --------------------------------------------------------------
+  - name: vat_number_format
+    type: regex
+    column: vat_number
+    pattern: '^[A-Z]{2}[A-Z0-9]{8,12}$'
+    severity: medium
+    description: VAT numbers are a two-letter country prefix followed by 8-12 characters.

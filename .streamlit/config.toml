@@ -1,0 +1,16 @@
+# Streamlit server configuration.
+#
+# `maxUploadSize` must be kept in sync with MAX_UPLOAD_MB (see .env.example). Streamlit
+# enforces this in the browser/transport layer; `dqcopilot.ingestion` enforces the same
+# limit again server-side, which is the authoritative check.
+[server]
+maxUploadSize = 25
+headless = true
+enableXsrfProtection = true
+enableCORS = false
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+base = "light"

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data quality report - {{ source_name }}</title>
+<style>
+  :root {
+    --ink: #1a1d21; --muted: #5b6470; --line: #e2e6ea; --bg: #ffffff;
+    --panel: #f7f9fb; --critical: #c0392b; --high: #d35400; --medium: #b7950b;
+    --low: #2471a3; --info: #6b7785; --ok: #1e8449;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink); background: var(--bg); margin: 0; padding: 2rem 1.5rem 4rem;
+    line-height: 1.55; max-width: 60rem; margin-inline: auto;
+  }
+  h1 { font-size: 1.9rem; margin: 0 0 .25rem; }
+  h2 { font-size: 1.25rem; margin: 2.5rem 0 .75rem; padding-bottom: .35rem; border-bottom: 2px solid var(--line); }
+  h3 { font-size: 1rem; margin: 1.5rem 0 .5rem; }
+  .sub { color: var(--muted); margin: 0 0 1.5rem; font-size: .92rem; }
+  .banner {
+    background: #fff8e1; border: 1px solid #f0d68a; border-radius: 8px;
+    padding: .85rem 1rem; margin: 1.25rem 0; font-size: .9rem;
+  }
+  .cards { display: flex; flex-wrap: wrap; gap: .75rem; margin: 1.25rem 0; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: .8rem 1rem; min-width: 8.5rem; flex: 1;
+  }
+  .card .label { font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  .card .value { font-size: 1.6rem; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; margin: .75rem 0 1.25rem; font-size: .88rem; }
+  th, td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--panel); font-weight: 600; white-space: nowrap; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .pill {
+    display: inline-block; padding: .1rem .5rem; border-radius: 999px;
+    font-size: .74rem; font-weight: 600; color: #fff; white-space: nowrap;
+  }
+  .critical { background: var(--critical); } .high { background: var(--high); }
+  .medium { background: var(--medium); } .low { background: var(--low); }
+  .info { background: var(--info); }
+  .bar { background: var(--line); border-radius: 4px; height: .5rem; overflow: hidden; min-width: 4rem; }
+  .bar > span { display: block; height: 100%; background: var(--ok); }
+  .muted { color: var(--muted); font-size: .85rem; }
+  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .82rem; }
+  pre { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: .7rem .85rem; overflow-x: auto; }
+  footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .82rem; }
+  .empty { color: var(--muted); font-style: italic; }
+</style>
+</head>
+<body>
+
+<h1>Data quality report</h1>
+<p class="sub">
+  <strong>{{ source_name }}</strong> &middot; {{ row_count }} rows &times; {{ column_count }} columns
+  &middot; analysed {{ generated_at }} &middot; analysis <code>{{ analysis_id }}</code>
+</p>
+
+<div class="banner">
+  <strong>Demonstration report.</strong> Data Quality Copilot is a portfolio project.
+  The quality score is a transparent heuristic, not a validated data quality metric, and
+  the datasets shipped with the project are entirely synthetic.
+</div>
+
+<div class="cards">
+  <div class="card"><div class="label">Quality score</div><div class="value">{{ score.overall }}<span class="muted">/100</span></div></div>
+  <div class="card"><div class="label">Grade</div><div class="value">{{ score.grade }}</div></div>
+  <div class="card"><div class="label">Findings</div><div class="value">{{ deterministic_findings|length }}</div></div>
+  <div class="card"><div class="label">AI suggestions</div><div class="value">{{ ai_findings|length }}</div></div>
+  <div class="card"><div class="label">Corrections applied</div><div class="value">{{ applied|length }}</div></div>
+</div>
+
+<h2>How the score is calculated</h2>
+<p>
+  The score is deterministic and reproducible. Each finding contributes a penalty equal to
+  its severity weight multiplied by the fraction of rows it affects:
+</p>
+<pre>penalty(finding) = severity_weight x affected_ratio x 100
+
+severity weights: critical 1.0 | high 0.6 | medium 0.3 | low 0.1 | info 0.0
+
+column_score = clamp(100 - SUM(penalties for that column), 0, 100)
+overall      = clamp(mean(column_scores) - SUM(dataset-level penalties), 0, 100)</pre>
+<p class="muted">
+  Only deterministic findings count. AI suggestions never move the score, so the number is
+  the same with or without an API key. Dataset-level penalty applied here:
+  {{ score.dataset_penalty }}.
+</p>
+
+<h2>Findings by severity</h2>
+<table>
+  <tr><th>Severity</th><th class="num">Count</th></tr>
+  {% for severity, count in severity_counts %}
+  <tr><td><span class="pill {{ severity }}">{{ severity }}</span></td><td class="num">{{ count }}</td></tr>
+  {% endfor %}
+</table>
+
+<h2>Column quality</h2>
+<table>
+  <tr>
+    <th>Column</th><th>Inferred type</th><th class="num">Missing</th>
+    <th class="num">Distinct</th><th class="num">Score</th><th>&nbsp;</th>
+  </tr>
+  {% for column in columns %}
+  <tr>
+    <td><code>{{ column.name }}</code></td>
+    <td>{{ column.semantic_type }}</td>
+    <td class="num">{{ column.missing_count }} ({{ column.missing_pct }})</td>
+    <td class="num">{{ column.unique_count }}</td>
+    <td class="num">{{ column.score }}</td>
+    <td><div class="bar"><span style="width: {{ column.score }}%"></span></div></td>
+  </tr>
+  {% endfor %}
+</table>
+
+<h2>Deterministic findings</h2>
+{% if deterministic_findings %}
+<table>
+  <tr><th>Severity</th><th>Issue</th><th>Column</th><th class="num">Rows</th><th>Explanation</th></tr>
+  {% for finding in deterministic_findings %}
+  <tr>
+    <td><span class="pill {{ finding.severity }}">{{ finding.severity }}</span></td>
+    <td>{{ finding.title }}</td>
+    <td><code>{{ finding.column }}</code></td>
+    <td class="num">{{ finding.affected_rows }}</td>
+    <td>{{ finding.explanation }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p class="empty">No deterministic checks reported a problem.</p>
+{% endif %}
+
+<h2>AI suggestions</h2>
+<p class="muted">
+  Advisory only. Every suggestion below was constrained to a JSON schema, validated with
+  Pydantic, and checked against the real dataset before being shown. None of it changes
+  data, and none of it affects the score.
+</p>
+{% if ai_findings %}
+<table>
+  <tr><th>Column</th><th>Suggestion</th><th class="num">Confidence</th></tr>
+  {% for finding in ai_findings %}
+  <tr>
+    <td><code>{{ finding.column }}</code></td>
+    <td><strong>{{ finding.title }}</strong><br>{{ finding.explanation }}</td>
+    <td class="num">{{ finding.confidence }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p class="empty">No AI suggestions{% if not ai_enabled %} (no API key configured - the app ran in reduced mode){% endif %}.</p>
+{% endif %}
+
+<h2>Correction decisions</h2>
+<div class="cards">
+  <div class="card"><div class="label">Approved</div><div class="value">{{ decisions.approved }}</div></div>
+  <div class="card"><div class="label">Rejected</div><div class="value">{{ decisions.rejected }}</div></div>
+  <div class="card"><div class="label">Pending</div><div class="value">{{ decisions.pending }}</div></div>
+  <div class="card"><div class="label">Manual review</div><div class="value">{{ decisions.manual_review }}</div></div>
+</div>
+{% if proposals %}
+<table>
+  <tr><th>Decision</th><th>Action</th><th>Column</th><th class="num">Rows</th><th>What it does</th></tr>
+  {% for proposal in proposals %}
+  <tr>
+    <td>{{ proposal.status }}</td>
+    <td><code>{{ proposal.action }}</code>{% if proposal.destructive %} <span class="pill high">destructive</span>{% endif %}{% if proposal.ai %} <span class="pill info">AI</span>{% endif %}</td>
+    <td><code>{{ proposal.column }}</code></td>
+    <td class="num">{{ proposal.affected_rows }}</td>
+    <td>{{ proposal.description }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p class="empty">No corrections were offered.</p>
+{% endif %}
+
+<h2>Changes applied to the data</h2>
+{% if applied %}
+<p>
+  Score before: <strong>{{ cleaned.score_before }}</strong> &rarr;
+  after: <strong>{{ cleaned.score_after }}</strong>
+  ({{ cleaned.score_delta }}). Rows: {{ cleaned.rows_before }} &rarr; {{ cleaned.rows_after }}.
+</p>
+<table>
+  <tr><th>Action</th><th>Column</th><th class="num">Rows changed</th><th>Applied at (UTC)</th></tr>
+  {% for change in applied %}
+  <tr>
+    <td><code>{{ change.action }}</code></td>
+    <td><code>{{ change.column }}</code></td>
+    <td class="num">{{ change.rows_changed }}</td>
+    <td>{{ change.applied_at }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p class="empty">Nothing was changed. No correction was approved.</p>
+{% endif %}
+
+{% if notes %}
+<h2>Notes from reading the file</h2>
+<ul>{% for note in notes %}<li>{{ note }}</li>{% endfor %}</ul>
+{% endif %}
+
+<footer>
+  Generated by Data Quality Copilot v{{ app_version }} on {{ generated_at }} (UTC).
+  Deterministic checks are reproducible; AI suggestions depend on the model and may vary
+  between runs. This report describes the data it was given and is not an assurance of
+  data quality.
+</footer>
+
+</body>
+</html>
