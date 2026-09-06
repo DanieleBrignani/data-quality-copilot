@@ -216,3 +216,54 @@ class TestFigures:
     def test_source_split_counts_both_sources(self, review: ReviewSession) -> None:
         figure = source_split_pie(review.analysis.findings)
         assert sum(figure.data[0].values) == len(review.analysis.findings)
+
+
+class TestEmptyCharts:
+    """A chart with no data must say so, not render an empty frame.
+
+    Plotly positions `textposition="outside"` labels from the data range; with an empty
+    trace that range is degenerate and it logs `attribute y: Expected length,
+    "-Infinity"` in the browser console. Beyond the noise, a blank panel on a clean
+    dataset reads as a broken chart rather than as good news.
+    """
+
+    @pytest.fixture
+    def clean_review(self, settings: Settings) -> ReviewSession:
+        frame = pd.DataFrame(
+            {
+                "customer_id": [f"CUST-{i:05d}" for i in range(30)],
+                "country": ["FR", "DE", "IT"] * 10,
+            }
+        )
+        result = analyze_bytes(frame.to_csv(index=False).encode(), "clean.csv", settings=settings)
+        return ReviewSession.from_analysis(result)
+
+    def test_missing_values_chart_explains_itself_when_empty(
+        self, clean_review: ReviewSession
+    ) -> None:
+        figure = missing_values_bar(clean_review.analysis.profile)
+        assert figure.data == ()
+        assert "No column has any missing values." in figure.layout.annotations[0].text
+
+    def test_severity_chart_explains_itself_when_empty(self) -> None:
+        from dqcopilot.scoring import QualityScore
+
+        figure = severity_bar(QualityScore(overall=100.0))
+        assert figure.data == ()
+        assert "No deterministic check" in figure.layout.annotations[0].text
+
+    def test_no_chart_carries_an_empty_data_trace(self, clean_review: ReviewSession) -> None:
+        """An empty trace is the shape that triggers the -Infinity error."""
+        analysis = clean_review.analysis
+        figures = {
+            "severity": severity_bar(analysis.score),
+            "columns": column_score_bar(analysis.score),
+            "missing": missing_values_bar(analysis.profile),
+            "sources": source_split_pie(analysis.findings),
+            "decisions": decision_bar(clean_review.decision_counts()),
+            "types": datatype_bar(analysis.profile),
+        }
+        for name, figure in figures.items():
+            for trace in figure.data:
+                values = list(getattr(trace, "x", None) or getattr(trace, "values", None) or [])
+                assert values, f"{name} has a trace with no data points"

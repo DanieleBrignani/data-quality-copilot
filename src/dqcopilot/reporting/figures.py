@@ -29,6 +29,33 @@ _LAYOUT = {
 }
 
 
+def empty_figure(title: str, message: str) -> go.Figure:
+    """Return a placeholder figure stating why there is nothing to plot.
+
+    A bar chart built from empty data is not merely blank: Plotly tries to place the
+    ``textposition="outside"`` labels, computes ``-Infinity`` for their position and
+    logs an error in the browser console. Beyond the noise, an unexplained empty panel
+    reads as a broken chart rather than as good news, so the placeholder says which it is.
+    """
+    figure = go.Figure()
+    figure.add_annotation(
+        text=message,
+        showarrow=False,
+        xref="paper",
+        yref="paper",
+        x=0.5,
+        y=0.5,
+        font={"size": 13, "color": "#5b6470"},
+    )
+    figure.update_layout(
+        title=title,
+        xaxis={"visible": False},
+        yaxis={"visible": False},
+        **_LAYOUT,
+    )
+    return figure
+
+
 def score_gauge(score: QualityScore) -> go.Figure:
     """A gauge showing the overall quality score."""
     figure = go.Figure(
@@ -55,6 +82,9 @@ def score_gauge(score: QualityScore) -> go.Figure:
 def severity_bar(score: QualityScore) -> go.Figure:
     """Findings grouped by severity."""
     severities = [severity for severity in Severity if score.severity_counts.get(severity.value)]
+    if not severities:
+        return empty_figure("Findings by severity", "No deterministic check reported a problem.")
+
     figure = go.Figure(
         go.Bar(
             x=[severity.value for severity in severities],
@@ -94,6 +124,9 @@ def missing_values_bar(profile: DatasetProfile, limit: int = 20) -> go.Figure:
     """Missing-value percentage per column."""
     ranked = sorted(profile.columns, key=lambda column: -column.missing_ratio)[:limit]
     ranked = [column for column in ranked if column.missing_count > 0]
+    if not ranked:
+        return empty_figure("Missing values by column", "No column has any missing values.")
+
     figure = go.Figure(
         go.Bar(
             x=[round(column.missing_ratio * 100, 2) for column in ranked],
