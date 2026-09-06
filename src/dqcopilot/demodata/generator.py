@@ -150,6 +150,17 @@ def _rng() -> random.Random:
     return random.Random(SEED)
 
 
+def _reference(reference_date: date | None) -> date:
+    """Return the date the generator treats as "today".
+
+    The demo data deliberately contains dates in the future, so that the future-date
+    check keeps firing however old the repository gets. That makes the output depend
+    on when it runs, which is why the reference date is a parameter: the generator is
+    reproducible given a seed **and** a reference date, and the tests pin both.
+    """
+    return reference_date or date.today()
+
+
 def _email(first: str, last: str, domain: str = "example.com") -> str:
     ascii_first = first.lower().translate(
         str.maketrans("áàâäéèêëíìîïóòôöúùûüç", "aaaaeeeeiiiioooouuuuc")
@@ -163,7 +174,9 @@ def _email(first: str, last: str, domain: str = "example.com") -> str:
 # --------------------------------------------------------------------------- customers
 
 
-def build_customers(rows: int = 220) -> tuple[pd.DataFrame, list[SeededError]]:
+def build_customers(
+    rows: int = 220, reference_date: date | None = None
+) -> tuple[pd.DataFrame, list[SeededError]]:
     """Build the synthetic customer dataset."""
     rng = _rng()
     log = _ErrorLog("customers")
@@ -189,11 +202,13 @@ def build_customers(rows: int = 220) -> tuple[pd.DataFrame, list[SeededError]]:
         )
 
     frame = pd.DataFrame(records)
-    _inject_customer_errors(frame, log, rng)
+    _inject_customer_errors(frame, log, rng, _reference(reference_date))
     return frame, log.errors
 
 
-def _inject_customer_errors(frame: pd.DataFrame, log: _ErrorLog, rng: random.Random) -> None:
+def _inject_customer_errors(
+    frame: pd.DataFrame, log: _ErrorLog, rng: random.Random, today: date
+) -> None:
     """Break the customer dataset in known, recorded ways."""
     # 1. Missing values
     for row in [3, 17, 42, 88, 130]:
@@ -325,7 +340,7 @@ def _inject_customer_errors(frame: pd.DataFrame, log: _ErrorLog, rng: random.Ran
             value,
         )
         frame.at[row, "signup_date"] = value
-    future = (date.today() + timedelta(days=400)).isoformat()
+    future = (today + timedelta(days=400)).isoformat()
     for row in [31, 104]:
         log.record(
             row,
@@ -367,7 +382,9 @@ def _inject_customer_errors(frame: pd.DataFrame, log: _ErrorLog, rng: random.Ran
 # --------------------------------------------------------------------------- sales
 
 
-def build_sales(rows: int = 300) -> tuple[pd.DataFrame, list[SeededError]]:
+def build_sales(
+    rows: int = 300, reference_date: date | None = None
+) -> tuple[pd.DataFrame, list[SeededError]]:
     """Build the synthetic sales dataset."""
     rng = _rng()
     log = _ErrorLog("sales")
@@ -395,11 +412,13 @@ def build_sales(rows: int = 300) -> tuple[pd.DataFrame, list[SeededError]]:
         )
 
     frame = pd.DataFrame(records)
-    _inject_sales_errors(frame, log, rng)
+    _inject_sales_errors(frame, log, rng, _reference(reference_date))
     return frame, log.errors
 
 
-def _inject_sales_errors(frame: pd.DataFrame, log: _ErrorLog, rng: random.Random) -> None:
+def _inject_sales_errors(
+    frame: pd.DataFrame, log: _ErrorLog, rng: random.Random, today: date
+) -> None:
     """Break the sales dataset in known, recorded ways."""
     # Missing values
     for row in [6, 48, 133, 210, 266]:
@@ -507,7 +526,7 @@ def _inject_sales_errors(frame: pd.DataFrame, log: _ErrorLog, rng: random.Random
             value,
         )
         frame.at[row, "order_date"] = value
-    future = (date.today() + timedelta(days=200)).isoformat()
+    future = (today + timedelta(days=200)).isoformat()
     for row in [63, 209]:
         log.record(
             row,
@@ -581,7 +600,9 @@ def _inject_sales_errors(frame: pd.DataFrame, log: _ErrorLog, rng: random.Random
 # --------------------------------------------------------------------------- suppliers
 
 
-def build_suppliers(rows: int = 120) -> tuple[pd.DataFrame, list[SeededError]]:
+def build_suppliers(
+    rows: int = 120, reference_date: date | None = None
+) -> tuple[pd.DataFrame, list[SeededError]]:
     """Build the synthetic supplier dataset."""
     rng = _rng()
     log = _ErrorLog("suppliers")
@@ -607,11 +628,13 @@ def build_suppliers(rows: int = 120) -> tuple[pd.DataFrame, list[SeededError]]:
         )
 
     frame = pd.DataFrame(records)
-    _inject_supplier_errors(frame, log, rng)
+    _inject_supplier_errors(frame, log, rng, _reference(reference_date))
     return frame, log.errors
 
 
-def _inject_supplier_errors(frame: pd.DataFrame, log: _ErrorLog, rng: random.Random) -> None:
+def _inject_supplier_errors(
+    frame: pd.DataFrame, log: _ErrorLog, rng: random.Random, today: date
+) -> None:
     """Break the supplier dataset, focusing on near-duplicate company names."""
     # The headline problem for suppliers: the same company entered several ways.
     # Each variant is derived from the row's *actual* generated name so the pair really
@@ -713,7 +736,7 @@ def _inject_supplier_errors(frame: pd.DataFrame, log: _ErrorLog, rng: random.Ran
         frame.at[row, "annual_spend"] = value
 
     # Future onboarding date
-    future = (date.today() + timedelta(days=90)).isoformat()
+    future = (today + timedelta(days=90)).isoformat()
     log.record(
         23,
         "onboarded_on",
@@ -745,12 +768,20 @@ DATASETS = {
 }
 
 
-def generate_all() -> tuple[dict[str, pd.DataFrame], list[SeededError]]:
-    """Build every demo dataset and the combined list of seeded errors."""
+def generate_all(
+    reference_date: date | None = None,
+) -> tuple[dict[str, pd.DataFrame], list[SeededError]]:
+    """Build every demo dataset and the combined list of seeded errors.
+
+    Args:
+        reference_date: The date treated as "today" when injecting future dates.
+            Defaults to the real today, so the demo keeps working as the repository
+            ages; pass a fixed date to get byte-reproducible output.
+    """
     frames: dict[str, pd.DataFrame] = {}
     errors: list[SeededError] = []
     for name, builder in DATASETS.items():
-        frame, dataset_errors = builder()
+        frame, dataset_errors = builder(reference_date=reference_date)
         frames[name] = frame.reset_index(drop=True)
         errors.extend(dataset_errors)
     return frames, errors
@@ -806,11 +837,12 @@ def _write_reproducible_xlsx(frame: pd.DataFrame, path: Path) -> None:
             repacked.writestr(info, data)
 
 
-def write_demo_data(output_dir: str | Path) -> Path:
+def write_demo_data(output_dir: str | Path, reference_date: date | None = None) -> Path:
     """Write every demo dataset plus ``ground_truth.json`` into ``output_dir``.
 
     Args:
         output_dir: Destination directory; created if it does not exist.
+        reference_date: The date treated as "today". Defaults to the real today.
 
     Returns:
         The path of the ground truth file.
@@ -818,7 +850,8 @@ def write_demo_data(output_dir: str | Path) -> Path:
     destination = Path(output_dir)
     destination.mkdir(parents=True, exist_ok=True)
 
-    frames, errors = generate_all()
+    today = _reference(reference_date)
+    frames, errors = generate_all(reference_date=today)
     for name, frame in frames.items():
         frame.to_csv(destination / f"{name}.csv", index=False)
 
@@ -828,6 +861,9 @@ def write_demo_data(output_dir: str | Path) -> Path:
     ground_truth = {
         "seed": SEED,
         "generator_version": 1,
+        # Recorded because the future-date defects are relative to it: the same seed
+        # and the same reference date reproduce these files byte for byte.
+        "reference_date": today.isoformat(),
         "disclaimer": (
             "Fully synthetic data. Every name, company, email and identifier is "
             "fabricated and resolves to nothing real."

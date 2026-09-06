@@ -10,6 +10,7 @@ The generator is seeded, so running it twice produces byte-identical files.
 from __future__ import annotations
 
 import argparse
+from datetime import date
 from pathlib import Path
 
 from dqcopilot.demodata import write_demo_data
@@ -25,9 +26,20 @@ def main() -> int:
         default=DEFAULT_OUTPUT,
         help=f"Destination directory (default: {DEFAULT_OUTPUT})",
     )
+    parser.add_argument(
+        "--reference-date",
+        type=date.fromisoformat,
+        default=None,
+        metavar="YYYY-MM-DD",
+        help=(
+            "Date treated as 'today' when injecting future dates. Defaults to the real "
+            "today, which is what keeps the future-date defects in the future; pass a "
+            "fixed date to reproduce a previous run byte for byte."
+        ),
+    )
     args = parser.parse_args()
 
-    ground_truth = write_demo_data(args.output)
+    ground_truth = write_demo_data(args.output, reference_date=args.reference_date)
     files = sorted(path.name for path in args.output.iterdir())
 
     print(f"Wrote {len(files)} file(s) to {args.output}:")

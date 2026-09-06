@@ -14,6 +14,7 @@ than hidden in a helper, because it is the honest statement of what "detected" m
 from __future__ import annotations
 
 from collections import defaultdict
+from datetime import date
 from pathlib import Path
 
 import pytest
@@ -108,9 +109,14 @@ class TestGeneratorReproducibility:
         second matched and two runs a second apart did not - an intermittent build
         failure rather than an honest one.
         """
+        # The reference date is pinned: the demo data deliberately contains dates in
+        # the future so the future-date check keeps firing however old the repository
+        # gets, which makes the raw output depend on the day it runs. The property
+        # worth asserting is determinism given a seed *and* a reference date.
+        reference = date(2026, 1, 1)
         first, second = tmp_path / "a", tmp_path / "b"
-        write_demo_data(first)
-        write_demo_data(second)
+        write_demo_data(first, reference_date=reference)
+        write_demo_data(second, reference_date=reference)
         for name in ("customers.csv", "sales.csv", "suppliers.csv", "ground_truth.json"):
             assert (first / name).read_bytes() == (second / name).read_bytes(), name
 
@@ -120,10 +126,32 @@ class TestGeneratorReproducibility:
         """Determinism must not have been bought by corrupting the file."""
         import pandas as pd
 
-        write_demo_data(tmp_path)
+        write_demo_data(tmp_path, reference_date=date(2026, 1, 1))
         frame = pd.read_excel(tmp_path / "suppliers.xlsx", engine="openpyxl")
         assert frame.shape[0] == 120
         assert "supplier_name" in frame.columns
+
+    def test_future_dates_stay_in_the_future(self, tmp_path: Path) -> None:
+        """The seeded future dates must be relative to the reference date, not fixed.
+
+        A hard-coded future date silently stops being a future date once that day
+        arrives, and the future_date check would quietly go green on data that is
+        still meant to be broken.
+        """
+        import pandas as pd
+
+        reference = date(2030, 6, 1)
+        write_demo_data(tmp_path, reference_date=reference)
+        customers = pd.read_csv(tmp_path / "customers.csv", dtype=str)
+        parsed = pd.to_datetime(customers["signup_date"], errors="coerce", format="mixed")
+        assert (parsed > pd.Timestamp(reference)).any(), (
+            "no signup_date is after the reference date"
+        )
+
+    def test_ground_truth_records_the_reference_date(self, tmp_path: Path) -> None:
+        write_demo_data(tmp_path, reference_date=date(2026, 1, 1))
+        truth = load_ground_truth(tmp_path / "ground_truth.json")
+        assert truth["reference_date"] == "2026-01-01"
 
     def test_ground_truth_records_every_error(self, demo_dir: Path) -> None:
         truth = load_ground_truth(demo_dir / "ground_truth.json")

@@ -137,8 +137,11 @@ jobs:
 
       - name: Generate twice and compare
         run: |
-          python scripts/generate_demo_data.py --output /tmp/demo-a
-          python scripts/generate_demo_data.py --output /tmp/demo-b
+          # The reference date is pinned. The demo data contains dates in the future
+          # on purpose, so raw output depends on the day it runs; the property being
+          # asserted is determinism given a seed and a reference date.
+          python scripts/generate_demo_data.py --output /tmp/demo-a --reference-date 2026-01-01
+          python scripts/generate_demo_data.py --output /tmp/demo-b --reference-date 2026-01-01
           diff -r /tmp/demo-a /tmp/demo-b
 
   docker:
