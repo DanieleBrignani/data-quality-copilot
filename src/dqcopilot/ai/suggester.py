@@ -17,7 +17,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from dqcopilot.ai.client import AiUnavailableError, AnthropicClient, build_user_content
+from dqcopilot.ai.client import (
+    AiUnavailableError,
+    AiUsage,
+    AnthropicClient,
+    build_user_content,
+)
 from dqcopilot.ai.grounding import (
     ground_category_mappings,
     ground_column_interpretations,
@@ -69,6 +74,8 @@ class AiSuggestions:
     rejected: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
     usage: dict[str, int] = field(default_factory=dict)
+    #: Per-call token counts and latency, for the audit trail. Never any content.
+    calls: list[AiUsage] = field(default_factory=list)
     ran: bool = False
 
     @property
@@ -122,6 +129,7 @@ class AiSuggester:
                 result.errors.append("One AI task failed unexpectedly and was skipped.")
 
         result.usage = self.client.telemetry.summary()
+        result.calls = list(self.client.telemetry.calls)
         return result
 
     # ------------------------------------------------------------------ tasks

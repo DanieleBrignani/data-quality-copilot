@@ -14,6 +14,7 @@ from dataclasses import dataclass
 
 from sqlalchemy.orm import Session, sessionmaker
 
+from dqcopilot.ai.suggester import AiSuggestions
 from dqcopilot.config import Settings, get_settings
 from dqcopilot.db import repository
 from dqcopilot.db.session import DatabaseUnavailableError, get_session_factory, session_scope
@@ -132,3 +133,51 @@ def store_download(
         )
 
     return _run("the download", action, settings, factory)
+
+
+def store_ai_calls(
+    review: ReviewSession,
+    suggestions: AiSuggestions,
+    settings: Settings | None = None,
+    factory: sessionmaker[Session] | None = None,
+) -> PersistenceOutcome:
+    """Record the cost and latency of each Anthropic call made for this analysis.
+
+    Only the shape of the call is stored - task, model, token counts, latency and
+    whether it succeeded. Prompts and responses are never persisted, so the trail can
+    answer "what did the AI cost and how slow was it" without keeping anything derived
+    from the user's data.
+    """
+    settings = settings or get_settings()
+    if not suggestions.calls:
+        return PersistenceOutcome(stored=True, detail="No AI call to record.")
+
+    def action(session: Session) -> None:
+        for call in suggestions.calls:
+            repository.record_ai_call(
+                session,
+                analysis_id=review.analysis.analysis_id,
+                task=call.task,
+                model=call.model,
+                input_tokens=call.input_tokens,
+                output_tokens=call.output_tokens,
+                latency_ms=call.latency_ms,
+                succeeded=call.succeeded,
+                error_type=call.error_type,
+            )
+        repository.log_event(
+            session,
+            event_type="ai.suggestions_generated",
+            summary=(
+                f"{len(suggestions.calls)} AI call(s): "
+                f"{suggestions.usage.get('input_tokens', 0):,} input and "
+                f"{suggestions.usage.get('output_tokens', 0):,} output tokens, "
+                f"{len(suggestions.findings)} suggestion(s), "
+                f"{len(suggestions.rejected)} discarded by grounding."
+            ),
+            analysis_id=review.analysis.analysis_id,
+            actor=review.reviewer,
+            payload=dict(suggestions.usage),
+        )
+
+    return _run("the AI usage", action, settings, factory)

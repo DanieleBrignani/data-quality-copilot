@@ -381,3 +381,131 @@ class TestSessionScope:
             # audit_events.event_type is NOT NULL; flushing this must fail.
             session.add(AuditEvent(event_type=None))  # type: ignore[arg-type]
             session.flush()
+
+
+class TestAiCallPersistence:
+    """The ai_calls table existed but nothing ever wrote to it.
+
+    The schema, the repository helper and the migration were all in place, so the audit
+    trail looked complete while silently recording no AI cost at all. These tests pin
+    the wiring shut.
+    """
+
+    @staticmethod
+    def _suggestions():  # noqa: ANN205 - test helper
+        from dqcopilot.ai.client import AiUsage
+        from dqcopilot.ai.suggester import AiSuggestions
+
+        return AiSuggestions(
+            ran=True,
+            usage={"calls": 2, "input_tokens": 1500, "output_tokens": 600, "failures": 1},
+            calls=[
+                AiUsage(
+                    task="column_meaning",
+                    model="claude-sonnet-5",
+                    input_tokens=1000,
+                    output_tokens=400,
+                    latency_ms=1200,
+                    succeeded=True,
+                ),
+                AiUsage(
+                    task="category_mapping",
+                    model="claude-sonnet-5",
+                    input_tokens=500,
+                    output_tokens=200,
+                    latency_ms=800,
+                    succeeded=False,
+                    error_type="RateLimitError",
+                ),
+            ],
+        )
+
+    def test_every_call_is_recorded(
+        self, factory: sessionmaker[Session], messy_csv: bytes, db_settings: Settings
+    ) -> None:
+        from dqcopilot.db import ai_usage_totals
+        from dqcopilot.services.persistence import store_ai_calls
+
+        result = analyze_bytes(messy_csv, "customers.csv", settings=db_settings)
+        review = ReviewSession.from_analysis(result)
+        with session_scope(factory) as session:
+            save_analysis(session, result, settings=db_settings)
+
+        outcome = store_ai_calls(review, self._suggestions(), settings=db_settings, factory=factory)
+        assert outcome.stored
+
+        with session_scope(factory) as session:
+            totals = ai_usage_totals(session)
+            assert totals == {"calls": 2, "input_tokens": 1500, "output_tokens": 600}
+
+    def test_failed_calls_are_recorded_with_their_error_type(
+        self, factory: sessionmaker[Session], messy_csv: bytes, db_settings: Settings
+    ) -> None:
+        """A failed call still costs latency; hiding it would understate the picture."""
+        from sqlalchemy import select
+
+        from dqcopilot.db.models import AiCallRecord
+        from dqcopilot.services.persistence import store_ai_calls
+
+        result = analyze_bytes(messy_csv, "customers.csv", settings=db_settings)
+        review = ReviewSession.from_analysis(result)
+        with session_scope(factory) as session:
+            save_analysis(session, result, settings=db_settings)
+        store_ai_calls(review, self._suggestions(), settings=db_settings, factory=factory)
+
+        with session_scope(factory) as session:
+            records = list(session.scalars(select(AiCallRecord).order_by(AiCallRecord.task)))
+            failed = next(r for r in records if not r.succeeded)
+            assert failed.task == "category_mapping"
+            assert failed.error_type == "RateLimitError"
+            assert failed.latency_ms == 800
+
+    def test_no_prompt_or_response_content_is_stored(
+        self, factory: sessionmaker[Session], messy_csv: bytes, db_settings: Settings
+    ) -> None:
+        from sqlalchemy import select
+
+        from dqcopilot.db.models import AiCallRecord
+        from dqcopilot.services.persistence import store_ai_calls
+
+        result = analyze_bytes(messy_csv, "customers.csv", settings=db_settings)
+        review = ReviewSession.from_analysis(result)
+        with session_scope(factory) as session:
+            save_analysis(session, result, settings=db_settings)
+        store_ai_calls(review, self._suggestions(), settings=db_settings, factory=factory)
+
+        with session_scope(factory) as session:
+            columns = set(AiCallRecord.__table__.columns.keys())
+            # The table must have no column capable of holding prompt or response text.
+            assert not columns & {"prompt", "response", "system", "content", "payload"}
+            record = session.scalars(select(AiCallRecord)).first()
+            assert record is not None
+            assert record.model == "claude-sonnet-5"
+
+    def test_an_audit_event_summarises_the_ai_usage(
+        self, factory: sessionmaker[Session], messy_csv: bytes, db_settings: Settings
+    ) -> None:
+        from dqcopilot.services.persistence import store_ai_calls
+
+        result = analyze_bytes(messy_csv, "customers.csv", settings=db_settings)
+        review = ReviewSession.from_analysis(result)
+        with session_scope(factory) as session:
+            save_analysis(session, result, settings=db_settings)
+        store_ai_calls(review, self._suggestions(), settings=db_settings, factory=factory)
+
+        with session_scope(factory) as session:
+            events = audit_trail(session, result.analysis_id)
+            ai_event = next(e for e in events if e.event_type == "ai.suggestions_generated")
+            assert "2 AI call(s)" in ai_event.summary
+            assert ai_event.payload["input_tokens"] == 1500
+
+    def test_no_calls_is_not_an_error(
+        self, factory: sessionmaker[Session], messy_csv: bytes, db_settings: Settings
+    ) -> None:
+        from dqcopilot.ai.suggester import AiSuggestions
+        from dqcopilot.services.persistence import store_ai_calls
+
+        result = analyze_bytes(messy_csv, "customers.csv", settings=db_settings)
+        review = ReviewSession.from_analysis(result)
+        outcome = store_ai_calls(review, AiSuggestions(), settings=db_settings, factory=factory)
+        assert outcome.stored

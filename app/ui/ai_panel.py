@@ -14,6 +14,7 @@ from app.ui import components, state
 from dqcopilot.ai import AiSuggester, AiSuggestions
 from dqcopilot.ai.payload import dataset_payload
 from dqcopilot.config import Settings
+from dqcopilot.services.persistence import store_ai_calls
 from dqcopilot.services.review import ReviewSession
 
 
@@ -36,6 +37,9 @@ def render(review: ReviewSession, settings: Settings) -> None:
             result = AiSuggester(settings).run(review.analysis)
             state.set_ai(result)
             _merge_into_review(review, result)
+            outcome = store_ai_calls(review, result, settings=settings)
+            if outcome.failed and outcome.detail and "disabled" not in outcome.detail:
+                state.add_persistence_note(outcome.detail)
         st.rerun()
 
     if suggestions is None:
