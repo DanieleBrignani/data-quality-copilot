@@ -100,11 +100,30 @@ def analyses(demo_dir: Path) -> dict[str, object]:
 
 class TestGeneratorReproducibility:
     def test_generation_is_deterministic(self, tmp_path: Path) -> None:
+        """Every generated file must be byte-identical, the workbook included.
+
+        The XLSX needed three fixes to get here: openpyxl stamps created/modified into
+        docProps/core.xml, rewrites modified again inside save(), and the ZIP container
+        records the wall-clock time of every entry. Before those, two runs in the same
+        second matched and two runs a second apart did not - an intermittent build
+        failure rather than an honest one.
+        """
         first, second = tmp_path / "a", tmp_path / "b"
         write_demo_data(first)
         write_demo_data(second)
-        for name in ("customers.csv", "sales.csv", "suppliers.csv"):
-            assert (first / name).read_bytes() == (second / name).read_bytes()
+        for name in ("customers.csv", "sales.csv", "suppliers.csv", "ground_truth.json"):
+            assert (first / name).read_bytes() == (second / name).read_bytes(), name
+
+        assert (first / "suppliers.xlsx").read_bytes() == (second / "suppliers.xlsx").read_bytes()
+
+    def test_generated_workbook_still_opens(self, tmp_path: Path) -> None:
+        """Determinism must not have been bought by corrupting the file."""
+        import pandas as pd
+
+        write_demo_data(tmp_path)
+        frame = pd.read_excel(tmp_path / "suppliers.xlsx", engine="openpyxl")
+        assert frame.shape[0] == 120
+        assert "supplier_name" in frame.columns
 
     def test_ground_truth_records_every_error(self, demo_dir: Path) -> None:
         truth = load_ground_truth(demo_dir / "ground_truth.json")

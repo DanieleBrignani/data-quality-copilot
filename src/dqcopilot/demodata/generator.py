@@ -11,10 +11,13 @@ from fixed word lists and resolve to nothing real.
 
 from __future__ import annotations
 
+import io
 import json
 import random
+import re
+import zipfile
 from dataclasses import asdict, dataclass, field
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -753,6 +756,56 @@ def generate_all() -> tuple[dict[str, pd.DataFrame], list[SeededError]]:
     return frames, errors
 
 
+#: Fixed document timestamp for the generated workbook. Naive on purpose: openpyxl
+#: stores document properties as naive UTC, and a timezone-aware value is not applied.
+XLSX_TIMESTAMP = datetime(2024, 1, 1, 0, 0, 0)  # noqa: DTZ001 - naive by design
+
+#: Fixed (year, month, day, hour, minute, second) written into every ZIP entry.
+XLSX_ZIP_DATE = (2024, 1, 1, 0, 0, 0)
+
+#: openpyxl overwrites dcterms:modified with the current time inside save(), ignoring
+#: whatever the properties were set to, so it has to be corrected in the written bytes.
+_MODIFIED_RE = re.compile(rb"(<dcterms:modified[^>]*>)[^<]*(</dcterms:modified>)")
+_FIXED_MODIFIED = b"2024-01-01T00:00:00Z"
+
+
+def _write_reproducible_xlsx(frame: pd.DataFrame, path: Path) -> None:
+    """Write a workbook whose bytes are identical on every run.
+
+    Three separate sources of non-determinism have to be removed. The document
+    properties in ``docProps/core.xml`` carry created/modified timestamps, which
+    openpyxl fills with the current time. The XLSX container is also a ZIP, and every
+    entry records the wall-clock time at which it was written - which openpyxl does not
+    expose. The workbook is therefore built in memory and then repacked with fixed
+    entry dates, in sorted order. openpyxl also rewrites ``dcterms:modified`` with
+    the current time inside ``save()``, ignoring the value set on the properties, so
+    that one field is corrected in the written bytes during the same pass.
+
+    Without the repacking step, two runs in the same second happen to match and two runs
+    a second apart do not, which is worse than plainly non-deterministic: it makes the
+    build fail intermittently.
+    """
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+        frame.to_excel(writer, index=False, sheet_name="suppliers")
+        properties = writer.book.properties
+        properties.created = XLSX_TIMESTAMP
+        properties.modified = XLSX_TIMESTAMP
+        properties.creator = "dqcopilot demo data generator"
+        properties.lastModifiedBy = "dqcopilot demo data generator"
+
+    source = zipfile.ZipFile(io.BytesIO(buffer.getvalue()))
+    with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as repacked:
+        for name in sorted(source.namelist()):
+            data = source.read(name)
+            if name == "docProps/core.xml":
+                data = _MODIFIED_RE.sub(rb"\g<1>" + _FIXED_MODIFIED + rb"\g<2>", data)
+            info = zipfile.ZipInfo(name, date_time=XLSX_ZIP_DATE)
+            info.compress_type = zipfile.ZIP_DEFLATED
+            info.external_attr = 0o600 << 16
+            repacked.writestr(info, data)
+
+
 def write_demo_data(output_dir: str | Path) -> Path:
     """Write every demo dataset plus ``ground_truth.json`` into ``output_dir``.
 
@@ -770,7 +823,7 @@ def write_demo_data(output_dir: str | Path) -> Path:
         frame.to_csv(destination / f"{name}.csv", index=False)
 
     # One dataset is also written as XLSX so the Excel path has a demo file too.
-    frames["suppliers"].to_excel(destination / "suppliers.xlsx", index=False, engine="openpyxl")
+    _write_reproducible_xlsx(frames["suppliers"], destination / "suppliers.xlsx")
 
     ground_truth = {
         "seed": SEED,
