@@ -429,6 +429,9 @@ does less.
   formats rather than guessing silently, but the parse itself picks a convention.
 - **Near-duplicate detection is exact-match-on-a-normalised-key**, not fuzzy matching.
   It finds `Acme Ltd` / `ACME Limited.`; it will not find `Acme` / `Akme`.
+- **Dependency detection compares column pairs**, so it is skipped above 60 columns and
+  finds only single-column determinants. `postcode` decided by `city` is found; a value
+  decided by two columns together is not.
 - **The quality score is a heuristic**, as described above.
 - **AI suggestions are not reproducible** between runs, which is exactly why they are
   excluded from the score.

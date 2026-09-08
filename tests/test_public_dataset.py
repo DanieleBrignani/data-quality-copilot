@@ -20,6 +20,7 @@ import pytest
 
 from dqcopilot.corrections.proposer import propose_corrections
 from dqcopilot.models import CorrectionAction, IssueType
+from dqcopilot.models.corrections import CorrectionProposal
 from dqcopilot.services.analysis import AnalysisResult, analyze_bytes
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "public"
@@ -123,14 +124,32 @@ def filled_columns(analysis: AnalysisResult) -> set[str]:
     }
 
 
+@pytest.fixture(scope="module")
+def proposals(analysis: AnalysisResult) -> list[CorrectionProposal]:
+    """Every correction offered for the real file."""
+    return propose_corrections(analysis.findings.sorted(), analysis.frame, analysis.profile)
+
+
 class TestItRefusesToInventLabels:
-    @pytest.mark.parametrize("column", ["MUNICIPIO", "ID_NIL", "geo_x", "geo_y"])
-    def test_never_offers_to_impute_a_code_or_a_coordinate(
-        self, filled_columns: set[str], column: str
-    ) -> None:
+    @pytest.mark.parametrize("column", ["MUNICIPIO", "ID_NIL", "NIL", "geo_x", "geo_y"])
+    def test_never_offers_to_impute_a_label(self, filled_columns: set[str], column: str) -> None:
         """These are the suggestions the tool used to make, and they were wrong.
 
         The median municipality of a list of shops is a real municipality, and it is not
         this shop's. Being arithmetically valid is what makes the answer dangerous.
         """
         assert column not in filled_columns
+
+    def test_says_which_column_would_have_supplied_the_neighbourhood(
+        self, proposals: list[CorrectionProposal]
+    ) -> None:
+        """`NIL` is decided by `ID_NIL`, but both are missing on the same twelve rows.
+
+        The useful answer is neither a fix nor a shrug: the value is knowable in
+        principle and absent from this file, so it has to come from the source system.
+        """
+        nil = next(proposal for proposal in proposals if proposal.column == "NIL")
+
+        assert nil.action is CorrectionAction.MANUAL_REVIEW
+        assert "decided by 'ID_NIL'" in nil.description
+        assert "has to come from the source system" in nil.description

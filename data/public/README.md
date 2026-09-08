@@ -44,14 +44,24 @@ covered by `tests/test_encoding_and_placeholders.py`:
    Both are arithmetically valid and factually wrong about a specific row. Codes,
    identifiers and coordinates now go to manual review instead.
 
+4. **A value that was knowable, treated as a number to average.** `NIL` (neighbourhood
+   name) was offered "fill with the most frequent value". Nothing in its *name* says it
+   is a place rather than a quantity — but the data says so: `ID_NIL` decides it, on all
+   534 rows where both are filled in. Gaps in a determined column now get looked up
+   rather than averaged.
+
 The third one is the useful demo. The bad suggestion was never applied, because a human
 has to approve every change — the design absorbed the mistake. A pipeline that corrected
 on its own would have written a wrong municipality into the data and reported success.
 
-## Known limits this file still shows
+## What this file cannot be fixed for
 
-`NIL` (neighbourhood name) is still offered "fill with the most frequent value", which
-is wrong for the same reason `MUNICIPIO` was: it is a place, not a quantity. Its name
-carries no hint that says so, and the rows where it is missing are exactly the rows
-where `ID_NIL` and the coordinates are missing too. Detecting that needs co-missingness
-analysis across columns, which this project does not do.
+The fourth case ends somewhere more interesting than a fix. `NIL` is decided by `ID_NIL`,
+so its twelve gaps have a correct answer in principle — except `ID_NIL` is missing on
+exactly those twelve rows. Those records were never geocoded, and no amount of analysis
+inside this file will recover a value that was never written down.
+
+So the proposal says that, in as many words, and offers no button. That is the outcome
+worth demonstrating: the honest answer to "what should go here?" is sometimes "this file
+does not know, and neither do I — ask the source system."
+

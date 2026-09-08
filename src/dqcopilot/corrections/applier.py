@@ -36,6 +36,9 @@ APPLICATION_ORDER: tuple[CorrectionAction, ...] = (
     CorrectionAction.PARSE_DATES,
     CorrectionAction.CLEAR_INVALID_VALUES,
     CorrectionAction.CLIP_TO_RANGE,
+    # Recovering a value from another column comes before inventing one from the
+    # column's own distribution: a looked-up answer is right, not merely plausible.
+    CorrectionAction.FILL_FROM_RELATED,
     CorrectionAction.FILL_MISSING,
     CorrectionAction.DROP_DUPLICATE_ROWS,
 )
@@ -131,6 +134,9 @@ def _apply_one(frame: pd.DataFrame, proposal: CorrectionProposal) -> tuple[pd.Da
 
     if action is CorrectionAction.DROP_DUPLICATE_ROWS:
         return _drop_duplicates(frame)
+    if action is CorrectionAction.FILL_FROM_RELATED:
+        # The only column correction that reads a second column, so it needs the frame.
+        return _fill_from_related(frame, proposal)
 
     column = proposal.column
     if column is None:
@@ -177,6 +183,38 @@ def _drop_duplicates(frame: pd.DataFrame) -> tuple[pd.DataFrame, int]:
     keep = ~normalised.duplicated(keep="first")
     removed = int((~keep).sum())
     return frame[keep].reset_index(drop=True), removed
+
+
+def _fill_from_related(
+    frame: pd.DataFrame, proposal: CorrectionProposal
+) -> tuple[pd.DataFrame, int]:
+    """Fill gaps by looking the value up in the column that determines it.
+
+    Only rows whose key is present *and* known are touched. A gap whose key is itself
+    missing stays a gap: this correction recovers recorded values, it does not extend
+    the mapping to cases the file never covered.
+    """
+    column = proposal.column
+    determinant = str(proposal.parameters.get("determinant", ""))
+    mapping = proposal.parameters.get("mapping")
+
+    if column is None or column not in frame.columns:
+        raise CorrectionError(f"Column '{column}' is not present in the dataset.")
+    if determinant not in frame.columns:
+        raise CorrectionError(f"The determining column '{determinant}' is not in the dataset.")
+    if not isinstance(mapping, dict) or not mapping:
+        raise CorrectionError("The proposal carries no lookup table.")
+
+    target = to_clean_strings(frame[column])
+    keys = to_clean_strings(frame[determinant]).astype("string").str.strip()
+    supplied = keys.map(lambda key: mapping.get(key), na_action="ignore").astype("string")
+
+    fillable = missing_mask(frame[column]) & supplied.notna()
+    after = target.mask(fillable, other=supplied)
+
+    result = frame.copy()
+    result[column] = after
+    return result, int(fillable.sum())
 
 
 def _strip_whitespace(series: pd.Series, proposal: CorrectionProposal) -> pd.Series:  # noqa: ARG001

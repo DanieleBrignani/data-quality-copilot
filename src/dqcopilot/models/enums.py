@@ -109,6 +109,7 @@ class CorrectionAction(StrEnum):
     STRIP_WHITESPACE = "strip_whitespace"
     NORMALIZE_CASE = "normalize_case"
     FILL_MISSING = "fill_missing"
+    FILL_FROM_RELATED = "fill_from_related"
     DROP_DUPLICATE_ROWS = "drop_duplicate_rows"
     CAST_TO_NUMERIC = "cast_to_numeric"
     PARSE_DATES = "parse_dates"

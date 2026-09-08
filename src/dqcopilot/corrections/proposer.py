@@ -30,6 +30,7 @@ from dqcopilot.models.enums import CorrectionAction, IssueType, SemanticType
 from dqcopilot.models.findings import Finding
 from dqcopilot.models.profile import DatasetProfile
 from dqcopilot.naming import looks_like_code, looks_like_coordinate
+from dqcopilot.profiling.dependencies import Dependency, build_lookup, find_determinant
 from dqcopilot.profiling.type_inference import (
     coerce_numeric,
     missing_mask,
@@ -452,6 +453,12 @@ def _fill_missing(
     if column_profile.missing_count >= column_profile.row_count:
         return _manual_review(finding, frame, profile)
 
+    # A value that another column already decides is recovered, never invented - and
+    # when the determinant is missing too, saying so beats offering an average.
+    dependency = find_determinant(frame, column)
+    if dependency is not None:
+        return _fill_from_related(finding, frame, profile, dependency)
+
     fill_value, strategy = _imputation_value(frame[column], column_profile.semantic_type, column)
     if fill_value is None:
         return _manual_review(finding, frame, profile)
@@ -664,5 +671,95 @@ def _clear_placeholders(
             affected_rows=finding.affected_rows,
             preview=_preview(column, before, after),
             destructive=True,
+        )
+    ]
+
+
+def _fill_from_related(
+    finding: Finding,
+    frame: pd.DataFrame,
+    profile: DatasetProfile,
+    dependency: Dependency,
+) -> list[CorrectionProposal]:
+    """Offer a lookup instead of an average, or explain why neither is possible.
+
+    Where the determining column is populated, the gap has one correct answer recorded
+    elsewhere in the file. Where it is missing too, nothing here can supply the value -
+    and a proposal that says so is worth more than one that fills the column with a
+    number nobody should trust.
+    """
+    column = finding.column
+    if column is None or column not in frame.columns:
+        return []
+
+    if dependency.recoverable_rows == 0:
+        return _unrecoverable(finding, frame, profile, dependency, column)
+
+    gaps = missing_mask(frame[column])
+    keys = to_clean_strings(frame[dependency.determinant]).astype("string").str.strip()
+    # Only the keys the gaps actually need travel with the proposal. A full lookup table
+    # would have to be truncated on a large column, and a truncated table silently fills
+    # fewer rows than the proposal promises.
+    needed = set(keys[gaps].dropna())
+    lookup = {key: value for key, value in build_lookup(frame, dependency).items() if key in needed}
+
+    before = to_clean_strings(frame[column])
+    supplied = keys.map(lambda key: lookup.get(key), na_action="ignore").astype("string")
+    after = before.mask(gaps & supplied.notna(), other=supplied)
+
+    remaining = (
+        f" The remaining {dependency.unrecoverable_rows:,} gap(s) stay empty, because "
+        f"'{dependency.determinant}' is missing there too."
+        if dependency.unrecoverable_rows
+        else ""
+    )
+
+    return [
+        CorrectionProposal(
+            proposal_id=make_proposal_id(finding.finding_id, CorrectionAction.FILL_FROM_RELATED),
+            finding_id=finding.finding_id,
+            action=CorrectionAction.FILL_FROM_RELATED,
+            column=column,
+            title=f"Recover '{column}' from '{dependency.determinant}'",
+            description=(
+                f"Fill {dependency.recoverable_rows:,} gap(s) in '{column}' by looking the "
+                f"value up in '{dependency.determinant}', which decides it: across the "
+                f"{dependency.evidence_rows:,} rows where both are populated, each of the "
+                f"{dependency.distinct_keys:,} keys maps to exactly one value. This recovers "
+                "what the file already records instead of inventing a plausible number." + remaining
+            ),
+            rationale=finding.explanation,
+            parameters={"determinant": dependency.determinant, "mapping": lookup},
+            affected_rows=dependency.recoverable_rows,
+            preview=_preview(column, before, after),
+            destructive=False,
+            confidence=0.9,
+        )
+    ]
+
+
+def _unrecoverable(
+    finding: Finding,
+    frame: pd.DataFrame,
+    profile: DatasetProfile,
+    dependency: Dependency,
+    column: str,
+) -> list[CorrectionProposal]:
+    """Explain that the value is knowable in principle but absent from this file."""
+    review = _manual_review(finding, frame, profile)
+    return [
+        review[0].model_copy(
+            update={
+                "description": (
+                    f"'{column}' is not a quantity to average: its value is decided by "
+                    f"'{dependency.determinant}', which agrees with it on all "
+                    f"{dependency.evidence_rows:,} rows where both are filled in. That "
+                    "would make the gaps recoverable by lookup - except that "
+                    f"'{dependency.determinant}' is missing on every one of the "
+                    f"{dependency.unrecoverable_rows:,} affected rows as well. Nothing in "
+                    "this file can supply the value; it has to come from the source system "
+                    "or stay empty."
+                )
+            }
         )
     ]
