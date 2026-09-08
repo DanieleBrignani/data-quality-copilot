@@ -61,16 +61,41 @@ correction is proposed rather than applied, and every decision — including the
 
 ## Screenshots
 
-> Replace these placeholders with real captures before presenting.
+Regenerate all six from the running app with `python scripts/capture_screenshots.py`, so
+they cannot quietly drift out of date as the interface changes.
 
-| | |
-|---|---|
-| `docs/images/01-upload.png` | Upload screen with the synthetic-data warning |
-| `docs/images/02-dashboard.png` | Quality dashboard: score gauge, severity, per-column scores |
-| `docs/images/03-findings.png` | Findings list, sorted by severity, each expandable |
-| `docs/images/04-corrections.png` | Correction approval with before/after preview |
-| `docs/images/05-ai.png` | AI suggestions panel, shown separately from deterministic findings |
-| `docs/images/06-report.png` | The downloadable HTML quality report |
+**The dashboard** — score gauge, findings by severity, and a per-column score that says
+which column is dragging the number down.
+
+![Quality dashboard](docs/images/02-dashboard.png)
+
+**Findings**, worst first, each one explaining itself in a sentence a non-engineer can
+act on rather than a rule id.
+
+![Findings list](docs/images/03-findings.png)
+
+**Corrections**, split into safe and destructive, each showing exactly which rows would
+change from what to what. Nothing is applied until a box is ticked.
+
+![Correction approval with before/after preview](docs/images/04-corrections.png)
+
+**The AI panel** before any request is made. The expander shows the entire payload that
+would leave the machine: a shape description, never the dataset, with personal-looking
+columns reduced to a format mask.
+
+![AI suggestions panel and payload preview](docs/images/05-ai.png)
+
+**The exported report**, which states its own limits and shows the score formula rather
+than asking to be trusted.
+
+![HTML quality report](docs/images/06-report.png)
+
+<details>
+<summary>The upload screen</summary>
+
+![Upload screen with the synthetic-data warning](docs/images/01-upload.png)
+
+</details>
 
 ---
 
