@@ -26,6 +26,9 @@ logger = get_logger(__name__)
 #: Cosmetic fixes run first so that de-duplication (which removes rows, and runs last)
 #: sees already-normalised values. A different order would give a different result.
 APPLICATION_ORDER: tuple[CorrectionAction, ...] = (
+    # Encoding repair comes first: every later step compares text, and a corrupted
+    # spelling would otherwise be treated as a category of its own.
+    CorrectionAction.REPAIR_ENCODING,
     CorrectionAction.STRIP_WHITESPACE,
     CorrectionAction.NORMALIZE_CASE,
     CorrectionAction.MAP_CATEGORY,
@@ -139,6 +142,7 @@ def _apply_one(frame: pd.DataFrame, proposal: CorrectionProposal) -> tuple[pd.Da
         CorrectionAction.STRIP_WHITESPACE: _strip_whitespace,
         CorrectionAction.NORMALIZE_CASE: _apply_mapping,
         CorrectionAction.MAP_CATEGORY: _apply_mapping,
+        CorrectionAction.REPAIR_ENCODING: _apply_mapping,
         CorrectionAction.CAST_TO_NUMERIC: _cast_numeric,
         CorrectionAction.PARSE_DATES: _parse_dates,
         CorrectionAction.CLEAR_INVALID_VALUES: _clear_invalid,
@@ -207,6 +211,12 @@ def _clear_invalid(series: pd.Series, proposal: CorrectionProposal) -> pd.Series
         )
     elif predicate == "invalid_date":
         invalid = parse_dates_with_format(series, None).isna() & ~missing_mask(series)
+    elif predicate == "placeholder_value":
+        targets = proposal.parameters.get("values")
+        if not isinstance(targets, list) or not targets:
+            raise CorrectionError("The proposal lists no placeholder values to clear.")
+        wanted = {str(value).strip().casefold() for value in targets}
+        invalid = text.str.strip().str.casefold().isin(wanted)
     else:
         raise CorrectionError(f"Unknown clear-values predicate '{predicate}'.")
 

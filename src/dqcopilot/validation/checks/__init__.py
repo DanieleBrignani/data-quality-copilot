@@ -9,6 +9,7 @@ from dqcopilot.validation.checks import (
     completeness,
     consistency,
     duplicates,
+    encoding,
     formatting,
     validity,
 )
@@ -18,6 +19,7 @@ __all__ = [
     "completeness",
     "consistency",
     "duplicates",
+    "encoding",
     "formatting",
     "validity",
 ]

@@ -29,3 +29,8 @@ Dockerfile    text eol=lf
 *.pdf         binary
 *.db          binary
 *.sqlite3     binary
+
+# The public dataset is a fixture whose exact bytes are the point: it is committed to
+# reproduce encoding defects found in real data. Line-ending normalisation would edit
+# the very corruption the tests assert on, so git must leave it alone.
+data/public/*.csv -text

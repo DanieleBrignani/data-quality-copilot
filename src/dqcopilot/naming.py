@@ -49,6 +49,59 @@ IDENTIFIER_NAME_HINTS: tuple[str, ...] = (
 )
 
 
+#: Tokens suggesting a column holds an administrative or classification code. These are
+#: stored as numbers and behave like numbers in every arithmetic sense, which is exactly
+#: the trap: the median postcode of a city is a postcode, and it is meaningless. Only
+#: the name distinguishes "municipality 3" from "quantity 3", so only the name is asked.
+CODE_NAME_HINTS: tuple[str, ...] = (
+    "zip",
+    "zipcode",
+    "postcode",
+    "postal",
+    "cap",
+    "plz",
+    "municipality",
+    "municipio",
+    "comune",
+    "district",
+    "region",
+    "regione",
+    "province",
+    "provincia",
+    "county",
+    "canton",
+    "prefecture",
+    "borough",
+    "ward",
+    "zone",
+    "sector",
+    "nuts",
+    "insee",
+    "istat",
+    "iso",
+    "fips",
+)
+
+
+#: Tokens suggesting a column holds a position on the earth. Coordinates are genuine
+#: measurements, so averaging them is arithmetically sound and factually useless: the
+#: median longitude of a list of shops is a real address, and it is not this shop's.
+COORDINATE_NAME_HINTS: tuple[str, ...] = (
+    "lat",
+    "latitude",
+    "lon",
+    "lng",
+    "long",
+    "longitude",
+    "geo",
+    "coord",
+    "coordinate",
+    "coordinates",
+    "easting",
+    "northing",
+)
+
+
 def column_tokens(name: str) -> set[str]:
     """Split a column name into lowercase word tokens.
 
@@ -71,3 +124,20 @@ def looks_temporal(column: str) -> bool:
 def looks_like_identifier(column: str) -> bool:
     """True when the column name suggests an identifier."""
     return name_matches(column, IDENTIFIER_NAME_HINTS)
+
+
+def looks_like_code(column: str) -> bool:
+    """True when the column holds a label that happens to be written with digits.
+
+    Identifiers and administrative codes are both included: neither can be averaged,
+    summed or interpolated, so neither may be imputed from the other values in its
+    column. The test is deliberately name-only. No property of the numbers themselves
+    separates a district code from a count of items, and inventing a structural rule
+    that appears to would only hide the guess.
+    """
+    return looks_like_identifier(column) or name_matches(column, CODE_NAME_HINTS)
+
+
+def looks_like_coordinate(column: str) -> bool:
+    """True when the column name suggests a geographic coordinate."""
+    return name_matches(column, COORDINATE_NAME_HINTS)

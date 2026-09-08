@@ -42,6 +42,9 @@ COPY --chown=appuser:appuser app/ app/
 COPY --chown=appuser:appuser alembic/ alembic/
 COPY --chown=appuser:appuser config/ config/
 COPY --chown=appuser:appuser scripts/ scripts/
+# The synthetic datasets are generated at start-up, but the real public one is a
+# committed fixture and has to travel with the image.
+COPY --chown=appuser:appuser data/public/ data/public/
 COPY --chown=appuser:appuser .streamlit/ .streamlit/
 COPY --chown=appuser:appuser alembic.ini docker/entrypoint.sh ./
 

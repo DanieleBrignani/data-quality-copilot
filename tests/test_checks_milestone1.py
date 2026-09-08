@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pandas as pd
 import pytest
 
 from dqcopilot.models import IssueType, Severity
 from dqcopilot.profiling import profile_dataset
 from dqcopilot.validation import CheckContext, run_checks
+from dqcopilot.validation.registry import registered_checks
 
 
 def analyse(frame: pd.DataFrame) -> dict[IssueType, list]:
@@ -130,3 +133,24 @@ class TestCheckRobustness:
     )
     def test_edge_case_frames(self, frame: pd.DataFrame) -> None:
         assert isinstance(analyse(frame), dict)
+
+
+class TestTheCatalogueMatchesTheDocumentation:
+    """The README describes the check suite to someone deciding whether to trust it.
+
+    It has already drifted once - the prose claimed fifteen checks while seventeen were
+    registered - and a reader has no way to notice. These two tests make the drift fail
+    the build instead.
+    """
+
+    def test_every_registered_check_is_documented(self) -> None:
+        readme = (Path(__file__).resolve().parents[1] / "README.md").read_text(encoding="utf-8")
+        undocumented = [
+            check.check_id for check in registered_checks() if f"`{check.check_id}`" not in readme
+        ]
+        assert not undocumented, f"missing from the README check table: {undocumented}"
+
+    def test_the_stated_count_is_the_real_count(self) -> None:
+        readme = (Path(__file__).resolve().parents[1] / "README.md").read_text(encoding="utf-8")
+        stated = f"{len(registered_checks())} deterministic checks"
+        assert stated in readme, f"the README should say '{stated}'"

@@ -49,7 +49,7 @@ correction is proposed rather than applied, and every decision — including the
 | **1. Upload** | CSV or XLSX, validated by extension *and* by content signature. |
 | **2. Preview** | The dataset as it was actually read, before anything is inferred. |
 | **3. Profile** | Per-column type inference, missing counts, cardinality, distributions. |
-| **4. Detect** | 15 deterministic checks plus your configurable business rules. |
+| **4. Detect** | 19 deterministic checks plus your configurable business rules. |
 | **5. Explain** | Each finding says what it is, how many rows, and why it matters. |
 | **6. Propose** | Concrete corrections with a before/after preview. Nothing is applied. |
 | **7. Approve** | You tick what you want. Destructive and AI-sourced fixes are separated. |
@@ -157,7 +157,7 @@ flowchart TB
     subgraph core["Domain - pure Python, no I/O"]
         Ingest["ingestion<br/><small>validate, sanitise, parse</small>"]
         Profile["profiling<br/><small>type inference, statistics</small>"]
-        Validate["validation<br/><small>15 deterministic checks</small>"]
+        Validate["validation<br/><small>19 deterministic checks</small>"]
         Rules["rules<br/><small>YAML business rules</small>"]
         Correct["corrections<br/><small>propose / apply</small>"]
         Score["scoring<br/><small>documented formula</small>"]
@@ -245,6 +245,7 @@ and the reasoning behind the main design decisions.
 | Check | What it finds |
 |---|---|
 | `missing_values` | Nulls and whitespace-only cells, with severity scaled to the share. |
+| `placeholder_values` | Filler standing in for data that was never collected (`N/A`, or a repeated word in a column of otherwise distinct names). |
 | `constant_column` | Columns holding a single repeated value. |
 | `exact_duplicate_rows` | Rows identical after trimming and case-folding. |
 | `probable_duplicate_rows` | Same entity typed differently (`Acme Ltd` / `ACME Limited.`). |
@@ -258,6 +259,7 @@ and the reasoning behind the main design decisions.
 | `inconsistent_category` | Values differing only by punctuation or spacing. |
 | `inconsistent_capitalization` | The same value written with different casing. |
 | `leading_trailing_whitespace` | Padded values that break joins and grouping. |
+| `corrupted_encoding` | UTF-8 text decoded as cp1252 or latin-1 (`SpecialitÃ `). |
 | `mixed_datatypes` | Columns mixing numbers, dates and text substantially. |
 | `schema_mismatch` | Header rows that were empty, duplicated or padded. |
 | `business_rule` | Your configurable rules (below). |

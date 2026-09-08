@@ -36,7 +36,7 @@ the ambiguous ones, and being able to explain that decision later.
 ## What this does
 
 1. **Upload** a CSV or Excel file.
-2. **It profiles and checks** — 15+ deterministic checks plus business rules you write in
+2. **It profiles and checks** — 19 deterministic checks plus business rules you write in
    plain YAML.
 3. **It explains** each problem in language a non-engineer can act on: how many rows,
    which rows, and what it breaks downstream.

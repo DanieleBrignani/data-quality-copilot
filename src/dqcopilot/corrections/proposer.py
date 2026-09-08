@@ -19,6 +19,7 @@ from collections.abc import Callable
 
 import pandas as pd
 
+from dqcopilot.encoding_repair import repair_mojibake
 from dqcopilot.models.corrections import (
     MAX_PREVIEW_ROWS,
     ChangePreview,
@@ -28,6 +29,7 @@ from dqcopilot.models.corrections import (
 from dqcopilot.models.enums import CorrectionAction, IssueType, SemanticType
 from dqcopilot.models.findings import Finding
 from dqcopilot.models.profile import DatasetProfile
+from dqcopilot.naming import looks_like_code, looks_like_coordinate
 from dqcopilot.profiling.type_inference import (
     coerce_numeric,
     missing_mask,
@@ -450,7 +452,7 @@ def _fill_missing(
     if column_profile.missing_count >= column_profile.row_count:
         return _manual_review(finding, frame, profile)
 
-    fill_value, strategy = _imputation_value(frame[column], column_profile.semantic_type)
+    fill_value, strategy = _imputation_value(frame[column], column_profile.semantic_type, column)
     if fill_value is None:
         return _manual_review(finding, frame, profile)
 
@@ -481,10 +483,29 @@ def _fill_missing(
     ]
 
 
-def _imputation_value(series: pd.Series, semantic_type: SemanticType) -> tuple[object | None, str]:
-    """Pick a defensible fill value, or ``None`` when none exists."""
+def _imputation_value(
+    series: pd.Series,
+    semantic_type: SemanticType,
+    column_name: str = "",
+) -> tuple[object | None, str]:
+    """Pick a defensible fill value, or ``None`` when none exists.
+
+    Codes and coordinates are refused outright. A missing district is not the median
+    district, a missing postcode is not the most common postcode, and a missing longitude
+    is not the middle of the map: those answers are arithmetically valid and factually
+    wrong. Unlike a biased average, they are wrong about one specific row, in a way a
+    reader can look up. Such a column goes to manual review instead.
+    """
     present = series[~missing_mask(series)]
     if present.empty:
+        return None, ""
+
+    unimputable = (
+        looks_like_code(column_name)
+        or looks_like_coordinate(column_name)
+        or semantic_type is SemanticType.IDENTIFIER
+    )
+    if unimputable:
         return None, ""
 
     if semantic_type.is_numeric:
@@ -552,4 +573,96 @@ def _ambiguous_keys(series: pd.Series, key: Callable[[str], str]) -> list[str]:
         group_key
         for group_key, forms in groups.items()
         if len(forms) > 1 and counts[forms[0]] == counts[forms[1]]
+    ]
+
+
+@builder_for(IssueType.CORRUPTED_ENCODING)
+def _repair_encoding(
+    finding: Finding, frame: pd.DataFrame, profile: DatasetProfile
+) -> list[CorrectionProposal]:
+    """Offer to decode mojibake back to the text the file really contained.
+
+    This is the rare correction that restores information instead of trading it away:
+    the repaired string is derived from the bytes already in the cell, not guessed from
+    the rest of the column. Values whose bytes were already discarded are left alone -
+    they appear in the finding and get no button, because nothing here can bring them
+    back.
+    """
+    column = finding.column
+    if column is None or column not in frame.columns:
+        return []
+
+    before = to_clean_strings(frame[column])
+    mapping: dict[str, str] = {}
+    for value in before.dropna().unique():
+        text = str(value)
+        repaired = repair_mojibake(text)
+        if repaired is not None:
+            mapping[text] = repaired
+
+    if not mapping:
+        return _manual_review(finding, frame, profile)
+
+    after = before.map(lambda value: mapping.get(value, value), na_action="ignore")
+
+    return [
+        CorrectionProposal(
+            proposal_id=make_proposal_id(finding.finding_id, CorrectionAction.REPAIR_ENCODING),
+            finding_id=finding.finding_id,
+            action=CorrectionAction.REPAIR_ENCODING,
+            column=column,
+            title=f"Repair the mangled characters in '{column}'",
+            description=(
+                f"Decode {len(mapping):,} damaged value(s) in '{column}' back to the text the "
+                "source file contained. The mangled characters are the original UTF-8 bytes "
+                "read through the wrong codec, so the repair is reversible arithmetic on "
+                "those bytes rather than a guess about what the word should have been."
+            ),
+            rationale=finding.explanation,
+            parameters={"mapping": dict(list(mapping.items())[:200])},
+            affected_rows=int((before != after).sum()),
+            preview=_preview(column, before, after),
+            confidence=0.95,
+        )
+    ]
+
+
+@builder_for(IssueType.PLACEHOLDER_VALUE)
+def _clear_placeholders(
+    finding: Finding, frame: pd.DataFrame, profile: DatasetProfile
+) -> list[CorrectionProposal]:
+    """Offer to turn filler text into a genuine missing value."""
+    column = finding.column
+    if column is None or column not in frame.columns:
+        return []
+
+    values = [str(value) for value in finding.details.get("values", [])]
+    if not values:
+        return _manual_review(finding, frame, profile)
+
+    before = to_clean_strings(frame[column])
+    targets = set(values)
+    matched = before.str.strip().str.casefold().isin(targets)
+    matched = matched.astype("boolean").fillna(False).astype(bool)
+    after = before.mask(matched, other=pd.NA)
+
+    return [
+        CorrectionProposal(
+            proposal_id=make_proposal_id(finding.finding_id, CorrectionAction.CLEAR_INVALID_VALUES),
+            finding_id=finding.finding_id,
+            action=CorrectionAction.CLEAR_INVALID_VALUES,
+            column=column,
+            title=f"Blank the placeholder values in '{column}'",
+            description=(
+                f"Replace {finding.affected_rows:,} filler value(s) in '{column}' with an empty "
+                "cell, so the gap is counted as missing instead of passing for data. This "
+                "lowers the completeness of the column on purpose: the information was never "
+                "there, and a report that says so is the accurate one."
+            ),
+            rationale=finding.explanation,
+            parameters={"predicate": "placeholder_value", "values": sorted(targets)},
+            affected_rows=finding.affected_rows,
+            preview=_preview(column, before, after),
+            destructive=True,
+        )
     ]

@@ -62,6 +62,8 @@ class IssueType(StrEnum):
     SCHEMA_MISMATCH = "schema_mismatch"
     BUSINESS_RULE_VIOLATION = "business_rule_violation"
     CONSTANT_COLUMN = "constant_column"
+    CORRUPTED_ENCODING = "corrupted_encoding"
+    PLACEHOLDER_VALUE = "placeholder_value"
 
 
 class SemanticType(StrEnum):
@@ -111,6 +113,7 @@ class CorrectionAction(StrEnum):
     CAST_TO_NUMERIC = "cast_to_numeric"
     PARSE_DATES = "parse_dates"
     MAP_CATEGORY = "map_category"
+    REPAIR_ENCODING = "repair_encoding"
     CLEAR_INVALID_VALUES = "clear_invalid_values"
     CLIP_TO_RANGE = "clip_to_range"
     MANUAL_REVIEW = "manual_review"

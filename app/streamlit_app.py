@@ -104,6 +104,13 @@ def _render_empty_state() -> None:
         "check fire. Regenerate them with `python scripts/generate_demo_data.py`.",
         icon="📄",
     )
+    st.info(
+        "`data/public/` holds a real open dataset from the Comune di Milano (CC0, no "
+        "personal data). Nobody here chose what is wrong with it, which makes it the "
+        "honest counterpart to the synthetic files — see `data/public/README.md` for what "
+        "it found and what it exposed as missing.",
+        icon="🌍",
+    )
 
 
 def _render_review(review: ReviewSession, settings) -> None:  # noqa: ANN001
