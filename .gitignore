@@ -26,5 +26,9 @@ exports/
 # Editors / OS
 .vscode/
 .idea/
+# Assistant tooling config. Machine-specific by nature: it stores absolute paths to a
+# local interpreter, which are both useless to anyone else and more about this machine
+# than a public repository needs to say.
+.claude/
 .DS_Store
 Thumbs.db
