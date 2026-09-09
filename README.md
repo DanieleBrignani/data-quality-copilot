@@ -245,6 +245,7 @@ and the reasoning behind the main design decisions.
 │   ├── ingestion/           Validation, sanitisation, CSV/XLSX parsing
 │   ├── profiling/           Type inference and per-column statistics
 │   ├── validation/checks/   The deterministic checks
+│   ├── sql/                 The same checks as SQL, for files larger than memory
 │   ├── rules/               Configurable business rules
 │   ├── corrections/         Proposal and application
 │   ├── ai/                  Payload, client, schemas, grounding, suggester
@@ -256,8 +257,9 @@ and the reasoning behind the main design decisions.
 ├── alembic/                 Database migrations
 ├── config/business_rules.yaml
 ├── data/demo/               Generated datasets and ground_truth.json
+├── data/public/             A real open dataset (CC0), committed as a fixture
 ├── docs/                    Architecture, demo script, business one-pager
-├── tests/                   ~380 tests
+├── tests/                   ~490 tests
 └── docker-compose.yml
 ```
 
@@ -423,7 +425,7 @@ pytest tests/test_demo_data_detection.py  # detection against ground truth
 pytest -m e2e                             # end-to-end service-layer flow
 ```
 
-Roughly 475 tests. **No test makes a network call** — the Anthropic SDK is replaced by a
+Roughly 490 tests. **No test makes a network call** — the Anthropic SDK is replaced by a
 stub that can return malformed, hallucinated and adversarial responses on demand.
 
 The test worth knowing about is `tests/test_demo_data_detection.py`. The demo generator
@@ -482,9 +484,71 @@ pandas and becomes the reviewer, and the right architecture is a different one:
 - **Review aggregates and samples, never all rows.** The human sees "3.2% of `revenue`
   is negative, here are twelve examples", not three hundred thousand cells.
 
-The pipeline is written as pure functions over a DataFrame precisely so that the engine
-underneath can be swapped without touching the check logic. Doing that swap is real work,
-not a configuration flag — it is listed under future improvements, not claimed as done.
+### Running the checks in the database instead
+
+The section above says what a real answer at ten times the size looks like: stop moving
+the data to the checks and move the checks to the data. `src/dqcopilot/sql/` is that
+answer, built rather than described.
+
+```python
+from dqcopilot.sql.engine import open_source
+from dqcopilot.sql.checks import run_sql_checks
+
+with open_source("orders.csv") as source:  # or .parquet
+    findings = run_sql_checks(source, rules)  # ordinary Finding objects
+```
+
+DuckDB streams the file and returns counts. The rows never enter Python, so peak memory
+is flat in the size of the input — measure it yourself:
+
+```bash
+python scripts/benchmark.py --compare-engines 500000
+```
+
+200,000 rows, 14 MB on disk:
+
+| engine | peak memory | checks run |
+|---|---|---|
+| pandas | 307 MB | 19 |
+| duckdb | **1 MB** | 4 |
+
+The memory difference is the structural one: pandas holds the dataset, DuckDB streams it,
+and only the second stays flat as the file grows. **The wall time is not a fair
+comparison** and is left out on purpose — the two engines run different numbers of checks,
+and that run was taken on the paging laptop described above. Peak memory is a property of
+the design; the seconds were a property of the afternoon.
+
+**Four checks, not nineteen, and that is deliberate.** Completeness, constant columns,
+exact duplicates and the business rules are what a database is good at: counting,
+grouping, comparing. The others are not ported because they should not be — encoding
+repair is a byte-level round trip, placeholder detection weighs a value's frequency
+against the column's distinctness, near-duplicate matching strips company legal forms,
+and type consistency classifies values against seventeen date formats. Re-implementing
+those in SQL would produce a second set of rules free to drift from the first.
+
+A rule the SQL engine cannot evaluate is **named in its output**, never silently passed.
+
+### The two engines are held to each other
+
+Two implementations of the same checks are worth having only if something forces them to
+agree. `tests/test_sql_engine.py::TestBothEnginesAgree` runs both over the demo dataset
+and compares every count. A new disagreement fails the build; the two known ones are
+listed with their reason, and a second test fails if one of them quietly goes away.
+
+Writing that test found a bug and a design question.
+
+The bug was mine: SQL counted every row of a duplicate group where pandas counts the
+repeats, so four duplicate identifiers were reported as eight.
+
+The design question is more interesting, and it is still open. The CSV reader treats
+`unknown`, `missing`, `nil`, `--` and `?` as empty cells before any check runs. So a
+column holding the word "unknown" twice is reported by the Python engine as two missing
+values, and by the SQL engine as two rows outside the allowed vocabulary. The SQL engine
+is arguably right: a word somebody typed is data, and rewriting it at read time is a
+silent transformation of exactly the kind this project refuses to make anywhere else —
+it is not approved, not in the audit log, and it hides the defect from the
+`placeholder_values` check written to surface it.
+
 
 ## Limitations
 
@@ -524,6 +588,7 @@ Roughly in the order they would pay off:
    and the reviewer that produced it.
 4. **Streaming ingestion** (Polars or chunked pandas) to lift the row ceiling.
 5. **Great Expectations export**, turning approved rules into a portable suite.
+   `src/dqcopilot/sql/` already emits the same checks as SQL; this would package them.
 6. **Fuzzy duplicate matching** behind a confidence threshold, with the same
    grounding-and-approval discipline as the AI suggestions.
 7. **Multi-sheet Excel support** with per-sheet analysis.

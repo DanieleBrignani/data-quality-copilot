@@ -26,6 +26,7 @@ import sys
 import time
 import tracemalloc
 from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -161,6 +162,54 @@ def run(rows: tuple[int, ...], repeats: int) -> int:
     return 0
 
 
+def compare_engines(rows: int, workdir: Path) -> int:
+    """Run both engines over the same file and print what each costs.
+
+    The comparison that matters is not seconds but peak memory: pandas holds the dataset,
+    DuckDB streams it. One of those numbers grows with the file and the other does not.
+    """
+    from dqcopilot.config import get_settings
+    from dqcopilot.rules.loader import load_rules_or_none
+    from dqcopilot.sql.checks import run_sql_checks
+    from dqcopilot.sql.engine import open_source
+
+    path = workdir / f"benchmark-{rows}.csv"
+    print(f"writing {rows:,} rows to {path} ...")
+    synthetic_frame(rows).to_csv(path, index=False)
+    print(f"file on disk: {path.stat().st_size / 1e6:.0f} MB\n")
+
+    rules = load_rules_or_none(get_settings().rules_file)
+
+    tracemalloc.start()
+    started = time.perf_counter()
+    frame = pd.read_csv(path, dtype=str)
+    profile = profile_dataset(frame, "benchmark")
+    python_findings = run_checks(CheckContext(frame=frame, profile=profile, rules=rules))
+    python_seconds = time.perf_counter() - started
+    python_peak = tracemalloc.get_traced_memory()[1] / 1e6
+    tracemalloc.stop()
+    del frame
+
+    tracemalloc.start()
+    started = time.perf_counter()
+    with open_source(path) as source:
+        sql_findings = run_sql_checks(source, rules)
+    sql_seconds = time.perf_counter() - started
+    sql_peak = tracemalloc.get_traced_memory()[1] / 1e6
+    tracemalloc.stop()
+
+    print(f"{'engine':<10} {'time':>9} {'peak MB':>9} {'findings':>9}")
+    print("-" * 40)
+    print(f"{'pandas':<10} {python_seconds:>8.1f}s {python_peak:>9.0f} {len(python_findings):>9}")
+    print(f"{'duckdb':<10} {sql_seconds:>8.1f}s {sql_peak:>9.0f} {len(sql_findings):>9}")
+    print(
+        "\nThe finding counts are not meant to match: the SQL engine implements the four "
+        "checks SQL expresses well, not all nineteen. Compare the peak memory."
+    )
+    path.unlink(missing_ok=True)
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -169,6 +218,18 @@ def main() -> int:
         help="Comma-separated row counts to measure.",
     )
     parser.add_argument("--repeats", type=int, default=DEFAULT_REPEATS)
+    parser.add_argument(
+        "--compare-engines",
+        type=int,
+        metavar="ROWS",
+        help="Write a CSV of ROWS rows and measure pandas against DuckDB on it.",
+    )
+    parser.add_argument(
+        "--workdir",
+        type=Path,
+        default=Path("."),
+        help="Where to write the temporary CSV for --compare-engines.",
+    )
     args = parser.parse_args()
 
     try:
@@ -179,6 +240,12 @@ def main() -> int:
             file=sys.stderr,
         )
         return 2
+
+    if args.compare_engines:
+        for line in describe_environment():
+            print(line)
+        print()
+        return compare_engines(args.compare_engines, args.workdir)
 
     return run(rows, max(1, args.repeats))
 

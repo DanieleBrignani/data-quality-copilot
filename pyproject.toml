@@ -27,6 +27,7 @@ dependencies = [
     "alembic>=1.13,<2",
     "psycopg[binary]>=3.2,<4",
     "anthropic>=0.40",
+    "duckdb>=1.1,<2",
 ]
 
 [project.optional-dependencies]
