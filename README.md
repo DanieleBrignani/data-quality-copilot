@@ -423,7 +423,7 @@ pytest tests/test_demo_data_detection.py  # detection against ground truth
 pytest -m e2e                             # end-to-end service-layer flow
 ```
 
-Roughly 380 tests. **No test makes a network call** — the Anthropic SDK is replaced by a
+Roughly 475 tests. **No test makes a network call** — the Anthropic SDK is replaced by a
 stub that can return malformed, hallucinated and adversarial responses on demand.
 
 The test worth knowing about is `tests/test_demo_data_detection.py`. The demo generator
@@ -438,6 +438,53 @@ There is also a guard in the other direction: clean data must score ≥ 95, so a
 cannot buy recall with false positives.
 
 ---
+
+## Scale: where this design stops being the right one
+
+The honest answer to "does it handle large data?" is a measurement and a boundary, not a
+claim. Reproduce both with:
+
+```bash
+python scripts/benchmark.py
+```
+
+Indicative run — 8 columns of deliberately messy synthetic data, profiling plus all 19
+checks:
+
+| rows | profile | checks | total | peak memory |
+|---|---|---|---|---|
+| 10,000 | 1.3 s | 1.8 s | ~6 s | 13 MB |
+| 50,000 | 6.2 s | 14.6 s | ~24 s | 76 MB |
+| 200,000 | 30.6 s | 56.1 s | ~89 s | 326 MB |
+
+**Read the environment line the script prints before trusting any of this.** That run was
+taken on a laptop with under 2 GB of free memory, and an earlier run of the same code on
+the same machine was three times faster. The script warns when memory is low and prints
+the spread across repeats, because a benchmark that hides its conditions is an anecdote
+with a table around it.
+
+What the shape says, and that part is stable: **time grows linearly with rows, memory
+somewhat worse than linearly.** 200,000 rows is the configured ceiling
+(`MAX_ROWS`), and it is a deliberate one rather than an accident.
+
+### Why the ceiling is a product decision, not only a technical one
+
+This is a tool for *interactive human review*. Nobody approves corrections row by row
+across fifty million records. Past roughly a million rows the bottleneck stops being
+pandas and becomes the reviewer, and the right architecture is a different one:
+
+- **Push the checks into the warehouse.** Most of them are expressible as SQL —
+  null counts, range violations, regex validity, duplicate keys. At scale you move the
+  computation to the data instead of pulling the data into a Python process. That is what
+  dbt tests and Great Expectations do, and it is the change that matters most.
+- **Profile on a sample, validate on everything.** Type inference already samples;
+  distributions do not need every row. Violations do.
+- **Review aggregates and samples, never all rows.** The human sees "3.2% of `revenue`
+  is negative, here are twelve examples", not three hundred thousand cells.
+
+The pipeline is written as pure functions over a DataFrame precisely so that the engine
+underneath can be swapped without touching the check logic. Doing that swap is real work,
+not a configuration flag — it is listed under future improvements, not claimed as done.
 
 ## Limitations
 

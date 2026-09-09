@@ -40,11 +40,33 @@ class CheckContext:
     profile: DatasetProfile
     rules: BusinessRuleSet | None = None
     notes: list[str] = field(default_factory=list)
+    #: Lazily built by :meth:`normalised_frame`; never set directly.
+    _normalised: pd.DataFrame | None = field(default=None, repr=False, compare=False)
 
     @property
     def row_count(self) -> int:
         """Number of rows in the dataset."""
         return int(self.frame.shape[0])
+
+    def normalised_frame(self) -> pd.DataFrame:
+        """Return the frame with text columns trimmed and case-folded, built once.
+
+        Both duplicate checks need this view, and it used to be rebuilt from scratch by
+        each of them - two full copies of the dataset to answer two questions about the
+        same normalisation. Columns that hold no text are shared rather than copied,
+        because trimming does not apply to them and duplicating a numeric column to
+        leave it unchanged is pure cost.
+        """
+        if self._normalised is None:
+            columns = {}
+            for name in self.frame.columns:
+                series = self.frame[name]
+                textual = series.dtype == object or pd.api.types.is_string_dtype(series)
+                columns[name] = (
+                    series.astype("string").str.strip().str.casefold() if textual else series
+                )
+            self._normalised = pd.DataFrame(columns, copy=False)
+        return self._normalised
 
     def columns(self) -> list[ColumnProfile]:
         """Column profiles in file order."""

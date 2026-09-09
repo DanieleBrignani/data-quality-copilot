@@ -23,7 +23,7 @@ class ExactDuplicateRowsCheck(Check):
         if row_count < 2:
             return []
 
-        normalised = _normalise_frame(context.frame)
+        normalised = context.normalised_frame()
         mask = normalised.duplicated(keep="first")
         affected = int(mask.sum())
         if affected == 0:
@@ -139,7 +139,7 @@ class ProbableDuplicateRowsCheck(Check):
 
         key = self._blocking_key(context.frame, key_columns)
         usable = key.str.len() > 0
-        exact = _normalise_frame(context.frame).duplicated(keep=False)
+        exact = context.normalised_frame().duplicated(keep=False)
 
         collides = key.duplicated(keep=False) & usable
         mask = collides & ~exact
@@ -245,13 +245,3 @@ class ProbableDuplicateRowsCheck(Check):
                 }
             )
         return examples
-
-
-def _normalise_frame(frame: pd.DataFrame) -> pd.DataFrame:
-    """Trim and case-fold string columns so cosmetic differences do not hide duplicates."""
-    normalised = frame.copy()
-    for column in normalised.columns:
-        series = normalised[column]
-        if series.dtype == object or pd.api.types.is_string_dtype(series):
-            normalised[column] = series.astype("string").str.strip().str.casefold()
-    return normalised

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -154,3 +155,36 @@ class TestTheCatalogueMatchesTheDocumentation:
         readme = (Path(__file__).resolve().parents[1] / "README.md").read_text(encoding="utf-8")
         stated = f"{len(registered_checks())} deterministic checks"
         assert stated in readme, f"the README should say '{stated}'"
+
+
+class TestTheNormalisedViewIsBuiltOnce:
+    """Both duplicate checks compare the same trimmed, case-folded view of the data.
+
+    Each of them used to build it from scratch - two full copies of the dataset to
+    answer two questions about one normalisation. Timing that is unreliable on a busy
+    machine, so the guarantee is asserted by counting the work instead of clocking it.
+    """
+
+    def test_repeated_calls_return_the_same_object(self) -> None:
+        frame = pd.DataFrame({"name": [" Alice ", "ALICE", "Bob"], "n": [1, 2, 3]})
+        context = CheckContext(frame=frame, profile=profile_dataset(frame, "test"))
+
+        assert context.normalised_frame() is context.normalised_frame()
+
+    def test_columns_without_text_are_shared_rather_than_copied(self) -> None:
+        frame = pd.DataFrame({"name": [" Alice ", "ALICE"], "amount": [1.5, 2.5]})
+        context = CheckContext(frame=frame, profile=profile_dataset(frame, "test"))
+        normalised = context.normalised_frame()
+
+        # Trimming does not apply to a float column, so duplicating it would be cost
+        # with no effect. Identity of the array object proves nothing here - pandas
+        # hands back a fresh wrapper either way - so the shared buffer is the test.
+        assert np.shares_memory(normalised["amount"].to_numpy(), frame["amount"].to_numpy())
+        assert normalised["name"].tolist() == ["alice", "alice"]
+
+    def test_normalising_never_alters_the_original(self) -> None:
+        frame = pd.DataFrame({"name": [" Alice ", "ALICE"]})
+        context = CheckContext(frame=frame, profile=profile_dataset(frame, "test"))
+        context.normalised_frame()
+
+        assert frame["name"].tolist() == [" Alice ", "ALICE"]

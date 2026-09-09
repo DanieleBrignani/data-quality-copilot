@@ -192,12 +192,26 @@ class MixedDatatypeCheck(Check):
 
     @staticmethod
     def _kind_shares(present: pd.Series, total: int) -> dict[str, float]:
-        """Classify every value as number/date/boolean/text and return the shares."""
+        """Classify every value as number/date/boolean/text and return the shares.
+
+        Date and boolean parsing are answered once per *distinct* value and then mapped
+        back, instead of once per row. The result is identical - the same string always
+        parses the same way - but a column of a million rows drawn from a few hundred
+        spellings costs a few hundred parses rather than a million.
+        """
         text = to_clean_strings(present).str.strip()
 
+        distinct = text.dropna().unique()
+        date_by_value = {value: bool(match_date_formats(str(value))) for value in distinct}
+        boolean_by_value = {
+            value: parse_boolean_token(str(value)) is not None for value in distinct
+        }
+
         numeric = coerce_numeric(present).notna()
-        dates = text.map(lambda value: bool(match_date_formats(str(value))))
-        booleans = text.map(lambda value: parse_boolean_token(str(value)) is not None)
+        # A value absent from the lookup maps to NA, and NA would read as True below.
+        # The old per-row form could not produce that; neither may this one.
+        dates = text.map(date_by_value).fillna(False)
+        booleans = text.map(boolean_by_value).fillna(False)
 
         # Assign each value to exactly one kind, most specific first.
         is_number = numeric.fillna(False).astype(bool)
