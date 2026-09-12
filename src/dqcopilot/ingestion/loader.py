@@ -33,22 +33,20 @@ from dqcopilot.logging_conf import get_logger
 
 logger = get_logger(__name__)
 
-#: Tokens treated as missing in addition to the pandas defaults
-#: (``""``, ``"NA"``, ``"N/A"``, ``"null"``, ``"NaN"``, ``"None"``, ``"#N/A"`` ...).
-EXTRA_NA_TOKENS: tuple[str, ...] = (
-    "--",
-    "?",
-    "n.a.",
-    "N.A.",
-    "missing",
-    "Missing",
-    "MISSING",
-    "unknown",
-    "Unknown",
-    "UNKNOWN",
-    "nil",
-    "NIL",
-)
+#: The reader reads; only the checks judge.
+#:
+#: Pandas converts about twenty tokens to "missing" while parsing - ``NA``, ``null``,
+#: ``None``, ``#N/A`` - and this project used to add ``unknown``, ``missing``, ``nil``,
+#: ``--`` and ``?`` on top. Every one of those is a value somebody wrote in a cell, and
+#: rewriting it during the read is a silent edit: not approved, absent from the audit
+#: log, and gone from the exported file. It also hid the defect from the very check
+#: written to surface it, since ``placeholder_values`` can only report what reaches it.
+#:
+#: So nothing is converted. A cell is missing when it is empty or holds only whitespace,
+#: which is what :func:`~dqcopilot.profiling.type_inference.missing_mask` already means
+#: everywhere else. A cell containing the word "unknown" is reported as a placeholder and
+#: cleared only if a human approves it.
+CONVERT_NOTHING_TO_MISSING = False
 
 _ENCODING_CANDIDATES: tuple[str, ...] = ("utf-8-sig", "utf-8", "cp1252", "latin-1")
 _DELIMITER_CANDIDATES: tuple[str, ...] = (",", ";", "\t", "|")
@@ -211,8 +209,7 @@ def _load_csv(content: bytes, safe_name: str, settings: Settings) -> LoadedDatas
             io.StringIO(text),
             sep=delimiter,
             dtype=str,
-            na_values=EXTRA_NA_TOKENS,
-            keep_default_na=True,
+            keep_default_na=CONVERT_NOTHING_TO_MISSING,
             skipinitialspace=False,
             skip_blank_lines=True,
             nrows=settings.max_rows + 1,
@@ -250,8 +247,7 @@ def _load_xlsx(content: bytes, safe_name: str, settings: Settings) -> LoadedData
             sheet_name = str(workbook.sheet_names[0])
             frame = workbook.parse(
                 sheet_name=sheet_name,
-                na_values=EXTRA_NA_TOKENS,
-                keep_default_na=True,
+                keep_default_na=CONVERT_NOTHING_TO_MISSING,
                 nrows=settings.max_rows + 1,
             )
     except IngestionError:

@@ -16,6 +16,9 @@ from dqcopilot.ingestion import (
     sanitize_filename,
     validate_extension,
 )
+from dqcopilot.models import IssueType
+from dqcopilot.profiling.type_inference import missing_mask
+from dqcopilot.services.analysis import analyze_bytes
 
 
 class TestSanitizeFilename:
@@ -180,3 +183,46 @@ class TestLoadTabular:
 
         with pytest.raises(EmptyFileError):
             load_tabular(buffer.getvalue(), "f.xlsx", settings=settings)
+
+
+class TestTheReaderDoesNotRewriteWhatItReads:
+    """Reading a file must not edit it.
+
+    Pandas converts about twenty tokens to "missing" while parsing, and this project
+    used to add its own on top: ``unknown``, ``missing``, ``nil``, ``--``, ``?``. Each
+    of those is a value somebody typed into a cell. Blanking it during the read is an
+    unapproved edit that never reaches the audit log, disappears from the exported file,
+    and hides the defect from the check written to report it.
+    """
+
+    @pytest.mark.parametrize(
+        "written",
+        ["unknown", "UNKNOWN", "missing", "nil", "--", "?", "n.a.", "N/A", "NA", "null", "None"],
+    )
+    def test_a_word_somebody_typed_survives_the_read(
+        self, written: str, settings: Settings
+    ) -> None:
+        content = f"customer,country\nAlice,IT\nBruno,{written}\n".encode()
+
+        dataset = load_tabular(content, "f.csv", settings=settings)
+
+        assert dataset.frame["country"].tolist() == ["IT", written]
+
+    def test_a_genuinely_empty_cell_is_still_missing(self, settings: Settings) -> None:
+        content = b"customer,country\nAlice,IT\nBruno,\nChloe,   \n"
+
+        dataset = load_tabular(content, "f.csv", settings=settings)
+        country = dataset.frame["country"]
+
+        assert country[0] == "IT"
+        assert missing_mask(country).tolist() == [False, True, True]
+
+    def test_the_distinction_reaches_the_findings(self, settings: Settings) -> None:
+        """One empty cell and two typed words are three different rows, not three gaps."""
+        content = b"customer,country\nAlice,IT\nBruno,unknown\nChloe,\nDavid,unknown\nElena,FR\n"
+
+        result = analyze_bytes(content, "f.csv", settings=settings)
+        by_type = {finding.issue_type: finding for finding in result.findings}
+
+        assert by_type[IssueType.MISSING_VALUES].affected_rows == 1
+        assert by_type[IssueType.PLACEHOLDER_VALUE].affected_rows == 2

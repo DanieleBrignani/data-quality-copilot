@@ -158,14 +158,16 @@ class TestBothEnginesAgree:
     """The two engines must return the same numbers, or explain why not."""
 
     #: Where the engines legitimately differ, and why. Anything not listed here must match.
+    #:
+    #: This set used to have three entries. Two of them described the CSV reader turning
+    #: the word "unknown" into an empty cell before Python could see it, which the SQL
+    #: engine had no equivalent for. The reader no longer rewrites what a file contains,
+    #: and both disappeared - the engines agreeing was independent evidence that the
+    #: quieter reader was the more consistent one.
     KNOWN_DIFFERENCES = {
         # Date parsing spans seventeen formats in Python; SQL skips the rule instead of
         # guessing, and says so in its "not evaluated" finding.
         "Business rule failed: signup_date_not_in_future",
-        # The CSV reader maps 'unknown' to an empty cell before Python ever sees it, so
-        # the two rows surface as missing values there and as an unknown category here.
-        "Missing values in 'segment'",
-        "Business rule failed: segment_is_known",
     }
 
     def test_every_shared_finding_reports_the_same_count(

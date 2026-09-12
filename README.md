@@ -272,7 +272,7 @@ and the reasoning behind the main design decisions.
 | Check | What it finds |
 |---|---|
 | `missing_values` | Nulls and whitespace-only cells, with severity scaled to the share. |
-| `placeholder_values` | Filler standing in for data that was never collected (`N/A`, or a repeated word in a column of otherwise distinct names). |
+| `placeholder_values` | Filler standing in for data that was never collected — `N/A`, `unknown`, or a word repeated in a column of otherwise distinct names. The reader leaves these in the data on purpose, so they are reported and cleared on approval rather than blanked on sight. |
 | `constant_column` | Columns holding a single repeated value. |
 | `exact_duplicate_rows` | Rows identical after trimming and case-folding. |
 | `probable_duplicate_rows` | Same entity typed differently (`Acme Ltd` / `ACME Limited.`). |
@@ -540,14 +540,22 @@ Writing that test found a bug and a design question.
 The bug was mine: SQL counted every row of a duplicate group where pandas counts the
 repeats, so four duplicate identifiers were reported as eight.
 
-The design question is more interesting, and it is still open. The CSV reader treats
-`unknown`, `missing`, `nil`, `--` and `?` as empty cells before any check runs. So a
-column holding the word "unknown" twice is reported by the Python engine as two missing
-values, and by the SQL engine as two rows outside the allowed vocabulary. The SQL engine
-is arguably right: a word somebody typed is data, and rewriting it at read time is a
-silent transformation of exactly the kind this project refuses to make anywhere else —
-it is not approved, not in the audit log, and it hides the defect from the
-`placeholder_values` check written to surface it.
+The second was a design question, and answering it changed the product. The CSV reader
+used to treat `unknown`, `missing`, `nil`, `--`, `?` — and the twenty tokens pandas
+converts by default — as empty cells before any check ran. So a column holding the word
+"unknown" twice was reported as two missing values by one engine and as two rows outside
+the allowed vocabulary by the other.
+
+The SQL engine was right. A word somebody typed is data, and rewriting it during the read
+is a silent transformation of exactly the kind this project refuses to make anywhere
+else: not approved, absent from the audit log, gone from the exported file — and hidden
+from the `placeholder_values` check written to surface it.
+
+**The reader now reads.** A cell is missing when it is empty or holds only whitespace.
+Everything else reaches the checks as written, gets reported as a placeholder, and is
+cleared only if a human approves it. The two engines then agreed on everything except
+date parsing, which is independent evidence that the quieter reader was the more
+consistent one.
 
 
 ## Limitations
