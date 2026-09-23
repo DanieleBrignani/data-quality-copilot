@@ -22,12 +22,22 @@ SEVERITY_ICONS: dict[Severity, str] = {
 
 
 def render_privacy_banner() -> None:
-    """Render the mandatory demo warning about uploading real data."""
+    """Render the mandatory demo warning about uploading real data.
+
+    The wording used to say "only anonymised column metadata" is sent. That was stricter
+    than the behaviour: with the default settings a handful of real values leave the
+    machine for every column that does not look personal. A promise the code does not
+    keep is worse than no promise, so the banner now says what actually happens and the
+    AI tab shows the exact payload before anything is sent.
+    """
     st.warning(
         "**Demo application - use synthetic data only.** Do not upload confidential, "
         "personal or production data. Uploaded files are held in memory for the duration "
-        "of your session and are not stored on disk. Only anonymised column metadata is "
-        "ever sent to the Anthropic API, and only when you explicitly ask for AI suggestions.",
+        "of your session and are not stored on disk. Nothing reaches the Anthropic API "
+        "unless you press the button on the AI tab - and then it is column names, types "
+        "and counts plus a few example values per column, with columns that look personal "
+        "or identifying masked first. The tab shows you the exact payload beforehand, and "
+        "`AI_SEND_SAMPLES=false` removes the example values entirely.",
         icon="⚠️",
     )
 

@@ -104,8 +104,8 @@ than asking to be trusted.
 ### With Docker (recommended)
 
 ```bash
-git clone <your-fork-url> Data-Quality-Copilot
-cd Data-Quality-Copilot
+git clone https://github.com/DanieleBrignani/data-quality-copilot.git
+cd data-quality-copilot
 cp .env.example .env
 docker compose up --build
 ```
@@ -259,7 +259,7 @@ and the reasoning behind the main design decisions.
 ├── data/demo/               Generated datasets and ground_truth.json
 ├── data/public/             A real open dataset (CC0), committed as a fixture
 ├── docs/                    Architecture, demo script, business one-pager
-├── tests/                   ~490 tests
+├── tests/                   ~500 tests
 └── docker-compose.yml
 ```
 
@@ -393,7 +393,7 @@ appear in a KPI.
 | Formulas never evaluated | Workbooks are read through openpyxl's cached-value mode. |
 | Exports neutralise formula payloads | Cells starting with `=`, `+`, `-`, `@` are quoted, blocking CSV injection. |
 | Uploads never written to disk | Held in memory for the session only. |
-| The dataset is never sent to Anthropic | Only a shape description; see below. |
+| The dataset is never sent to Anthropic | Column names, types, counts and a few example values per column - personal-looking columns masked. Exact payload shown before sending; see below. |
 | Personal-looking columns are masked | `alice@example.com` → `aaaaa@aaaaaaa.aaa`. |
 | Cell values stripped before storage | `PERSIST_EXAMPLES=false` by default. |
 | Logs carry metadata only | Plus a redaction filter that scrubs keys and emails. |
@@ -425,7 +425,7 @@ pytest tests/test_demo_data_detection.py  # detection against ground truth
 pytest -m e2e                             # end-to-end service-layer flow
 ```
 
-Roughly 490 tests. **No test makes a network call** — the Anthropic SDK is replaced by a
+Roughly 500 tests. **No test makes a network call** — the Anthropic SDK is replaced by a
 stub that can return malformed, hallucinated and adversarial responses on demand.
 
 The test worth knowing about is `tests/test_demo_data_detection.py`. The demo generator

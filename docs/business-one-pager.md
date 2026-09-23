@@ -55,7 +55,7 @@ the ambiguous ones, and being able to explain that decision later.
 | **Propose, never apply** | Nothing changes without an explicit approval. Software that guesses on your behalf is the problem, not the solution. |
 | **Refuse to guess** | Where a fix would require a coin flip — two equally common spellings, a probable duplicate — it explains the choice and stops. |
 | **Record the rejections too** | An audit trail that only records changes cannot answer "was this seen and consciously left alone?" |
-| **Your data stays yours** | The dataset is never sent to any API. Only a shape description, with personal-looking columns masked. |
+| **Your data stays yours** | The dataset is never sent to any API. What goes is column names, types, counts and a few example values per column, with personal-looking columns masked - and only when you ask for it. |
 
 ## Where AI is used, and where it is not
 
@@ -97,5 +97,5 @@ Python 3.12 · Streamlit · pandas · Pydantic · SQLAlchemy + Alembic · Postgr
 Plotly · Anthropic API (optional) · Docker Compose · pytest · Ruff · mypy · GitHub
 Actions.
 
-Two containers, `docker compose up --build`, roughly 380 tests including a suite that
+Two containers, `docker compose up --build`, roughly 500 tests including a suite that
 verifies every deliberately-seeded error in the synthetic data is actually detected.
