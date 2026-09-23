@@ -97,5 +97,5 @@ Python 3.12 · Streamlit · pandas · Pydantic · SQLAlchemy + Alembic · Postgr
 Plotly · Anthropic API (optional) · Docker Compose · pytest · Ruff · mypy · GitHub
 Actions.
 
-Two containers, `docker compose up --build`, roughly 500 tests including a suite that
+Two containers, `docker compose up --build`, roughly 520 tests including a suite that
 verifies every deliberately-seeded error in the synthetic data is actually detected.

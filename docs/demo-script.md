@@ -85,7 +85,7 @@ panel still works. That's deliberate.")*
 > change applied. That's stored in PostgreSQL too, as metadata only: it can tell you
 > five emails were malformed and which rows, not what they said.
 >
-> Six days, about 500 tests, and the one I'd point you at asserts that every deliberately
+> Six days, about 520 tests, and the one I'd point you at asserts that every deliberately
 > seeded error in the demo data actually gets found."
 
 ---

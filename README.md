@@ -59,6 +59,51 @@ correction is proposed rather than applied, and every decision — including the
 
 ---
 
+## One defect, end to end
+
+Everything below is copied from a real run against `data/demo/customers.csv`, not
+written by hand.
+
+**1 — What the check found**
+
+> **Mixed capitalisation in 'country'** — 1 value in `country` appears with more than
+> one capitalisation, affecting 29 rows (13.2%). For example: `'IT'` / `'it'`.
+
+**2 — What it offered to do about it**
+
+> **Unify capitalisation in 'country'** — rewrite each value using the spelling that
+> already occurs most often in the column. The most frequent form wins, so no new
+> spelling is invented.
+>
+> | row | before | after |
+> |---|---|---|
+> | 47 | `it` | `IT` |
+
+**3 — What a person decided**
+
+Nothing happened until the box was ticked. The same run left the 36 groups of probable
+duplicates alone: that proposal has no button, because merging records is not reversible
+and the tool cannot tell two customers apart from one entered twice.
+
+**4 — What came out**
+
+Row 47 of the cleaned export reads `IT`, and the audit log records the change:
+
+```json
+{
+  "proposal_id": "2f4cc4bfa464e343",
+  "action": "normalize_case",
+  "column": "country",
+  "rows_changed": 1,
+  "applied_at": "2026-09-23T10:44:19+00:00"
+}
+```
+
+The quality score moved from 66.83 to 67.04 — recomputed by re-running every check on
+the cleaned data, not estimated from what was approved.
+
+---
+
 ## Screenshots
 
 Regenerate all six from the running app with `python scripts/capture_screenshots.py`, so
@@ -259,7 +304,7 @@ and the reasoning behind the main design decisions.
 ├── data/demo/               Generated datasets and ground_truth.json
 ├── data/public/             A real open dataset (CC0), committed as a fixture
 ├── docs/                    Architecture, demo script, business one-pager
-├── tests/                   ~500 tests
+├── tests/                   ~520 tests
 └── docker-compose.yml
 ```
 
@@ -425,7 +470,7 @@ pytest tests/test_demo_data_detection.py  # detection against ground truth
 pytest -m e2e                             # end-to-end service-layer flow
 ```
 
-Roughly 500 tests. **No test makes a network call** — the Anthropic SDK is replaced by a
+Roughly 520 tests. **No test makes a network call** — the Anthropic SDK is replaced by a
 stub that can return malformed, hallucinated and adversarial responses on demand.
 
 The test worth knowing about is `tests/test_demo_data_detection.py`. The demo generator
@@ -438,6 +483,39 @@ the rule for `count`.
 
 There is also a guard in the other direction: clean data must score ≥ 95, so a check
 cannot buy recall with false positives.
+
+### What the checks say about clean data
+
+Detection rate measured against seeded errors only proves one direction: a check that
+flagged every row would score perfectly. `tests/test_false_positives.py` measures the
+other one, over seven datasets a careful person would call clean, each built to be
+awkward for one particular check.
+
+| The data | Aimed at | Defects asserted | Sent for review |
+|---|---|---|---|
+| Two-letter state codes including `ND` | `placeholder_values` | 0 | — |
+| Categories that repeat because they are categories | `placeholder_values` | 0 | — |
+| Two people who share a name | `probable_duplicate_rows` | 0 | 1 |
+| Correctly encoded `Viganò`, `São`, `Đặng` | `corrupted_encoding` | 0 | — |
+| `nome+tag@sotto.dominio.museum` | `invalid_email` | 0 | — |
+| Forty dates, all `DD/MM/YYYY` | `inconsistent_date_format` | 0 | — |
+| Ordinary quantities and prices | `suspicious_numeric` | 0 | — |
+
+The distinction in those last two columns is the point. **Nothing is asserted about
+correct data.** One case is sent for review, and that is right rather than wrong: two
+people really can share a name, and nothing in the file distinguishes that from one
+record entered twice, so the tool asks instead of deciding.
+
+Writing those fixtures took three attempts, which is itself the argument for having
+them. The first contained genuine duplicate rows and the second named a column `person`
+rather than `full_name`, so the duplicate check returned before running. Both looked
+like clean passes. A test now asserts that each fixture reaches the check it is aimed at.
+
+**What this is not.** These are not precision and recall. Both numbers would need an
+evaluation set annotated by someone who did not write the checks, and calling a
+self-annotated sample a benchmark would be exactly the overstatement this project spends
+its time catching elsewhere.
+
 
 ---
 
