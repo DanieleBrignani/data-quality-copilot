@@ -164,7 +164,9 @@ reboot); without it the engine will not start.
 This brings up two containers: `app` (Streamlit and the Python services) and `db`
 (PostgreSQL 16). The app waits for the database, applies the Alembic migrations, and
 generates the synthetic demo datasets. From `docker compose up` to a healthy app is
-**about 15 seconds** on a warm image, a few minutes the first time while it builds.
+**about 20 seconds** once the image exists, a few minutes the first time while it builds.
+That figure was measured twice from a fresh `git clone` of this repository with the
+database volume removed, not from an already-warm machine.
 
 Stop it with `docker compose down`, or `docker compose down --volumes` to discard the
 database as well.
