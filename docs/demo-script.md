@@ -35,7 +35,7 @@ docker compose up --build          # or: streamlit run app/streamlit_app.py
 
 > "220 rows, nine columns, analysed in under a second. Score 67 out of 100 — and that
 > formula is printed right here, it's not a black box. The worst column is `signup_date`
-> at 38, because it mixes ISO dates with `DD/MM/YYYY` and contains a 30th of February."
+> at 40, because it mixes ISO dates with `DD/MM/YYYY` and contains a 30th of February."
 
 **Do:** open the Findings tab, expand one finding.
 
@@ -56,18 +56,22 @@ preview. Scroll to "Needs a closer look".
 > explains them, and it hands you the decision, because merging customer records is not
 > something software should do on its own."
 
-**Do:** tick two corrections, press Apply.
+**Do:** tick exactly these two — *Rewrite 'signup_date' as ISO dates* and *Convert
+'revenue' to numbers* — then press Apply. Both are marked destructive, which is the
+point: you read the preview before agreeing.
 
-> "Score 67 to 71. That's measured, not predicted — the cleaned dataset goes through the
+> "Score 67 to 77. That's measured, not predicted — the cleaned dataset goes through the
 > whole pipeline again."
 
 ### 1:00 — 1:15 · The AI, kept in its lane
 
 **Do:** open the AI suggestions tab. Expand "Show exactly what would be sent".
 
-> "The AI does the ambiguous work only: does `France` mean `FR` in this dataset? And the
-> dataset never leaves the machine — this is the entire payload, and columns that look
-> personal are masked to their shape.
+> "The AI does the ambiguous work only: does `France` mean `FR` in this dataset? The
+> dataset is never uploaded. What goes is this — column names, types, counts and a few
+> example values per column, with anything that looks personal masked to its shape. You
+> are looking at the whole payload before it is sent, and one setting removes the
+> examples entirely.
 >
 > Every response is schema-constrained, Pydantic-validated, and then checked against
 > your actual data. If it proposes merging a value that isn't in the column, it's

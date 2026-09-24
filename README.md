@@ -157,9 +157,34 @@ docker compose up --build
 
 Then open <http://localhost:8501>.
 
-This starts two containers: `app` (Streamlit + the Python services) and `db`
-(PostgreSQL 16). On start-up the app waits for the database, applies the Alembic
-migrations, and generates the synthetic demo datasets.
+**Docker is the only prerequisite** — no Python, no database, no API key. On Windows
+that means Docker Desktop with WSL2 enabled (`wsl --install --no-distribution`, then
+reboot); without it the engine will not start.
+
+This brings up two containers: `app` (Streamlit and the Python services) and `db`
+(PostgreSQL 16). The app waits for the database, applies the Alembic migrations, and
+generates the synthetic demo datasets. From `docker compose up` to a healthy app is
+**about 15 seconds** on a warm image, a few minutes the first time while it builds.
+
+Stop it with `docker compose down`, or `docker compose down --volumes` to discard the
+database as well.
+
+### Try it in three minutes
+
+1. Open <http://localhost:8501> and drag `data/demo/customers.csv` onto the uploader.
+2. **Dashboard** — 220 rows, 9 columns, **score 67/100**. The per-column bars put
+   `signup_date` last at 40.
+3. **Findings (23)** — expand *Mixed date formats in 'signup_date'*. It tells you which
+   formats it saw and why mixing them is dangerous.
+4. **Corrections (10 pending)** — expand *Rewrite 'signup_date' as ISO dates* and read
+   the before/after rows. Tick it, and tick *Convert 'revenue' to numbers*. Both are
+   marked destructive on purpose.
+5. Press **Apply approved corrections**. The score moves **67 → 77**, recomputed by
+   running every check again rather than estimated.
+6. **Downloads** — take the cleaned CSV and the audit log. The log names both changes,
+   the columns, the rows affected and who approved them.
+
+Nothing you did not tick has changed.
 
 ### Without Docker
 
@@ -175,10 +200,9 @@ streamlit run app/streamlit_app.py
 Python 3.12+. No database server needed: the default `DATABASE_URL` is a local SQLite
 file and the tables are created on first run.
 
-### Try it
-
-Upload `data/demo/customers.csv`. It contains deliberately seeded errors, every one of
-them recorded in `data/demo/ground_truth.json`.
+The three-minute walkthrough above applies either way. Every error in
+`data/demo/customers.csv` was seeded deliberately and is recorded in
+`data/demo/ground_truth.json`, which is what makes the detection rate measurable.
 
 ---
 
